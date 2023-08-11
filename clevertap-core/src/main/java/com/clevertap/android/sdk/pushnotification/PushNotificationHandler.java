@@ -84,6 +84,39 @@ public class PushNotificationHandler implements ActionButtonClickHandler {
     }
 
     @Override
+    public synchronized boolean onMessageReceived(final Context applicationContext, final Bundle message,
+                                                  final String pushType, final boolean useCustomLayout) {
+        message.putLong(Constants.OMR_INVOKE_TIME_IN_MILLIS,System.currentTimeMillis());
+        CleverTapAPI cleverTapAPI = CleverTapAPI
+                .getGlobalInstance(applicationContext, getAccountIdFromNotificationBundle(message));
+        NotificationInfo info = CleverTapAPI.getNotificationInfo(message);
+
+        if (info.fromCleverTap) {
+            if (cleverTapAPI != null) {
+                cleverTapAPI.getCoreState().getConfig().log(LOG_TAG,
+                        pushType + "received notification from CleverTap: " + message.toString());
+                if (isForPushTemplates(message) && CleverTapAPI.getNotificationHandler() != null) {
+                    // render push template
+                    CleverTapAPI.getNotificationHandler().onMessageReceived(applicationContext, message, pushType,useCustomLayout);
+                } else if(isForSignedCall(message) && CleverTapAPI.getSignedCallNotificationHandler() != null){
+                    // handle voip push payload
+                    CleverTapAPI.getSignedCallNotificationHandler().onMessageReceived(applicationContext, message, pushType,useCustomLayout);
+                } else {
+                    // render core push
+                    cleverTapAPI.renderPushNotificationOnCallerThread(new CoreNotificationRenderer(), applicationContext, message);
+                    //CleverTapAPI.createNotification(applicationContext, message);
+                }
+            } else {
+                Logger.d(LOG_TAG, pushType + "received notification from CleverTap: " + message.toString());
+                Logger.d(LOG_TAG, pushType + " not renderning since cleverTapAPI is null");
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
     public boolean onNewToken(final Context applicationContext, final String token, final String pushType) {
         if (pushType.equals(FCM.getType())) {
             CleverTapAPI.tokenRefresh(applicationContext, token, FCM);

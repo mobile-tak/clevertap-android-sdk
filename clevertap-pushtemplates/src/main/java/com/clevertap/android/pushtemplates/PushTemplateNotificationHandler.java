@@ -29,9 +29,25 @@ public class PushTemplateNotificationHandler implements ActionButtonClickHandler
         }
         return false;
     }
-
     @Override
     public boolean onMessageReceived(final Context applicationContext, final Bundle message, final String pushType) {
+        try {
+            PTLog.debug("Inside Push Templates");
+            // initial setup
+            INotificationRenderer templateRenderer = new TemplateRenderer(applicationContext, message);
+            CleverTapAPI cleverTapAPI = CleverTapAPI
+                    .getGlobalInstance(applicationContext,
+                            PushNotificationUtil.getAccountIdFromNotificationBundle(message));
+            Objects.requireNonNull(cleverTapAPI)
+                    .renderPushNotificationOnCallerThread(templateRenderer, applicationContext, message);
+
+        } catch (Throwable throwable) {
+            PTLog.verbose("Error parsing FCM payload", throwable);
+        }
+        return true;
+    }
+    @Override
+    public boolean onMessageReceived(final Context applicationContext, final Bundle message, final String pushType,final boolean useCustomLayout) {
         try {
             PTLog.debug("Inside Push Templates");
             // initial setup

@@ -11,6 +11,8 @@ public interface NotificationHandler {
      */
     boolean onMessageReceived(final Context applicationContext, Bundle message, final String pushType);
 
+    boolean onMessageReceived(final Context applicationContext, Bundle message, final String pushType, final boolean useCustomLayout);
+
     /**
      * @param applicationContext - application context
      * @param token              - token received from cloud messaging owners
