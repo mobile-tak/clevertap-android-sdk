@@ -65,7 +65,7 @@ object Libs {
 
     const val installreferrer: String = "com.android.installreferrer:installreferrer:_"
 
-    const val com_android_tools_build_gradle: String = "com.android.tools.build:gradle:_"
+    const val com_android_tools_build_gradle: String = "com.android.tools.build:gradle:7.0.2"
 
     const val lint_api: String = "com.android.tools.lint:lint-api:_"
 
