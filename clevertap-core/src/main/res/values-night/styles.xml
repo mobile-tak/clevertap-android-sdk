@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Base.AppTheme.notification.info" parent="TextAppearance.Compat.Notification.Info">
+        <item name="android:textColor"> #ffffff </item>
+    </style>
+</resources>

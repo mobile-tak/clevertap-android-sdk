@@ -10,6 +10,8 @@ import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.text.Html;
+import android.widget.RemoteViews;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
@@ -18,6 +20,7 @@ import androidx.core.app.NotificationCompat.Builder;
 
 import com.clevertap.android.sdk.CleverTapInstanceConfig;
 import com.clevertap.android.sdk.Constants;
+import com.clevertap.android.sdk.R;
 import com.clevertap.android.sdk.Utils;
 import com.clevertap.android.sdk.interfaces.AudibleNotification;
 
@@ -61,48 +64,48 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
 
         // uncommon - START
         NotificationCompat.Style style;
-        String bigPictureUrl = extras.getString(Constants.WZRK_BIG_PICTURE);
-        if (bigPictureUrl != null && bigPictureUrl.startsWith("http")) {
-            DownloadedBitmap downloadedBitmap = DownloadedBitmapFactory.INSTANCE.nullBitmapWithStatus(Status.INIT_ERROR);
-            try {
-                downloadedBitmap = Utils.getNotificationBitmapWithTimeout(bigPictureUrl,
-                        false, context, config, Constants.PN_IMAGE_DOWNLOAD_TIMEOUT_IN_MILLIS);
-
-                Bitmap bpMap = downloadedBitmap.getBitmap();
-
-                if (bpMap == null) {
-                    throw new Exception("Failed to fetch big picture!");
-                }
-                long pift = downloadedBitmap.getDownloadTime();
-                config.getLogger()
-                        .verbose("Fetched big picture in " + pift + " millis");
-
-                extras.putString(Constants.WZRK_BPDS,downloadedBitmap.getStatus().getStatusValue());
-
-                if (extras.containsKey(Constants.WZRK_MSG_SUMMARY)) {
-                    String summaryText = extras.getString(Constants.WZRK_MSG_SUMMARY);
-                    style = new NotificationCompat.BigPictureStyle()
-                            .setSummaryText(summaryText)
-                            .bigPicture(bpMap);
-                } else {
-                    style = new NotificationCompat.BigPictureStyle()
-                            .setSummaryText(notifMessage)
-                            .bigPicture(bpMap);
-                }
-            } catch (Throwable t) {
-                style = new NotificationCompat.BigTextStyle()
-                        .bigText(notifMessage);
-                extras.putString(Constants.WZRK_BPDS, downloadedBitmap.getStatus().getStatusValue());
-                config.getLogger()
-                        .verbose(config.getAccountId(),
-                                "Falling back to big text notification, couldn't fetch big picture",
-                                t);
-            }
-        } else {
-            style = new NotificationCompat.BigTextStyle()
-                    .bigText(notifMessage);
-            extras.putString(Constants.WZRK_BPDS, Status.NO_IMAGE.getStatusValue());
-        }
+//        String bigPictureUrl = extras.getString(Constants.WZRK_BIG_PICTURE);
+//        if (bigPictureUrl != null && bigPictureUrl.startsWith("http")) {
+//            DownloadedBitmap downloadedBitmap = DownloadedBitmapFactory.INSTANCE.nullBitmapWithStatus(Status.INIT_ERROR);
+//            try {
+//                downloadedBitmap = Utils.getNotificationBitmapWithTimeout(bigPictureUrl,
+//                        false, context, config, Constants.PN_IMAGE_DOWNLOAD_TIMEOUT_IN_MILLIS);
+//
+//                Bitmap bpMap = downloadedBitmap.getBitmap();
+//
+//                if (bpMap == null) {
+//                    throw new Exception("Failed to fetch big picture!");
+//                }
+//                long pift = downloadedBitmap.getDownloadTime();
+//                config.getLogger()
+//                        .verbose("Fetched big picture in " + pift + " millis");
+//
+//                extras.putString(Constants.WZRK_BPDS,downloadedBitmap.getStatus().getStatusValue());
+//
+//                if (extras.containsKey(Constants.WZRK_MSG_SUMMARY)) {
+//                    String summaryText = extras.getString(Constants.WZRK_MSG_SUMMARY);
+//                    style = new NotificationCompat.BigPictureStyle()
+//                            .setSummaryText(summaryText)
+//                            .bigPicture(bpMap);
+//                } else {
+//                    style = new NotificationCompat.BigPictureStyle()
+//                            .setSummaryText(notifMessage)
+//                            .bigPicture(bpMap);
+//                }
+//            } catch (Throwable t) {
+//                style = new NotificationCompat.BigTextStyle()
+//                        .bigText(notifMessage);
+//                extras.putString(Constants.WZRK_BPDS, downloadedBitmap.getStatus().getStatusValue());
+//                config.getLogger()
+//                        .verbose(config.getAccountId(),
+//                                "Falling back to big text notification, couldn't fetch big picture",
+//                                t);
+//            }
+//        } else {
+//            style = new NotificationCompat.BigTextStyle()
+//                    .bigText(notifMessage);
+//            extras.putString(Constants.WZRK_BPDS, Status.NO_IMAGE.getStatusValue());
+//        }
 
         boolean requiresChannelId = VERSION.SDK_INT >= VERSION_CODES.O;
         if (requiresChannelId && extras.containsKey(Constants.WZRK_SUBTITLE)) {
@@ -120,12 +123,16 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
                 .setContentText(notifMessage)
                 .setContentIntent(LaunchPendingIntentFactory.getLaunchPendingIntent(extras, context))
                 .setAutoCancel(true)
-                .setStyle(style)
                 .setSmallIcon(smallIcon);
 
+        RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification_layout);
+        contentView.setImageViewResource(R.id.image, R.drawable.ic_stat_name);
+        contentView.setTextViewText(R.id.title, Html.fromHtml(notifMessage));
+        nb.setCustomContentView(contentView);
+
         // uncommon
-        nb.setLargeIcon(Utils.getNotificationBitmapWithTimeout(icoPath, true, context,
-                config, Constants.PN_LARGE_ICON_DOWNLOAD_TIMEOUT_IN_MILLIS).getBitmap());//uncommon
+//        nb.setLargeIcon(Utils.getNotificationBitmapWithTimeout(icoPath, true, context,
+//                config, Constants.PN_LARGE_ICON_DOWNLOAD_TIMEOUT_IN_MILLIS).getBitmap());//uncommon
 
         // Uncommon - START
         // add actions if any
@@ -146,6 +153,7 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
         return nb;
 
     }
+
 
     @Override
     public void setSmallIcon(final int smallIcon, final Context context) {
