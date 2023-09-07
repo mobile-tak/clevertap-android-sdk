@@ -94,6 +94,12 @@ android {
             }
         }
     }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
 }
 
 Properties properties = new Properties()
@@ -134,7 +140,7 @@ afterEvaluate {
                 artifactId artifact
                 version version
 
-                artifact sourcesJar
+//                artifact sourcesJar
 
                 pom {
                     name = artifact
