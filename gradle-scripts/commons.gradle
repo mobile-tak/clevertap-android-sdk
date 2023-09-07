@@ -9,12 +9,12 @@ ext {
     Repo = 'Maven'
     publishedGroupId = 'com.clevertap.android'
 
-    siteUrl = 'https://github.com/CleverTap/clevertap-android-sdk'
-    gitUrl = 'https://github.com/CleverTap/clevertap-android-sdk.git'
+    siteUrl = 'https://github.com/mobile-tak/clevertap-android-sdk'
+    gitUrl = 'https://github.com/mobile-tak/clevertap-android-sdk.git'
 
-    developerId = 'clevertap'
-    developerName = 'CleverTap'
-    developerEmail = 'support@clevertap.com'
+    developerId = 'mobiletak'
+    developerName = 'mobiletak'
+    developerEmail = 'servicesfortaks@gmail.com'
 }
 
 ext["signing.keyId"] = ''
@@ -157,9 +157,9 @@ afterEvaluate {
                     }
                     // Version control info - if you're using GitHub, follow the format as seen here
                     scm {
-                        connection = 'scm:git:github.com/CleverTap/clevertap-android-sdk.git'
-                        developerConnection = 'scm:git:ssh:github.com/CleverTap/clevertap-android-sdk.git'
-                        url = 'https://github.com/CleverTap/clevertap-android-sdk/tree/master'
+                        connection = 'scm:git:github.com/mobile-tak/clevertap-android-sdk.git'
+                        developerConnection = 'scm:git:ssh:github.com/mobile-tak/clevertap-android-sdk.git'
+                        url = 'https://github.com/mobile-tak/clevertap-android-sdk/tree/master'
                     }
                 }
             }
