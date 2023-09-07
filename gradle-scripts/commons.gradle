@@ -147,14 +147,14 @@ afterEvaluate {
                             url = licenseUrl
                         }
                     }
-                    developers {
-                        developer {
-                            id = developerId
-                            name = developerName
-                            email = developerEmail
-                        }
-                        // Add all other devs here...
-                    }
+//                    developers {
+//                        developer {
+//                            id = developerId
+//                            name = developerName
+//                            email = developerEmail
+//                        }
+//                        // Add all other devs here...
+//                    }
                     // Version control info - if you're using GitHub, follow the format as seen here
                     scm {
                         connection = 'scm:git:github.com/mobile-tak/clevertap-android-sdk.git'
@@ -180,8 +180,8 @@ afterEvaluate {
     }
 }
 
-signing {
-    sign publishing.publications
-}
+//signing {
+//    sign publishing.publications
+//}
 apply from: "${project.rootDir}/gradle-scripts/checkstyle.gradle"
 apply from: "${project.rootDir}/gradle-scripts/detekt.gradle"
