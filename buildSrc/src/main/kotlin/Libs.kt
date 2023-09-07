@@ -109,7 +109,7 @@ object Libs {
 
     const val agcp: String = "com.huawei.agconnect:agcp:_"
 
-    const val push: String = "com.huawei.hms:push:_"
+    const val push: String = "com.huawei.hms:push:6.11.0.300"
 
     const val de_fayard_buildsrclibs_gradle_plugin: String =
         "de.fayard.buildSrcLibs:de.fayard.buildSrcLibs.gradle.plugin:_"
