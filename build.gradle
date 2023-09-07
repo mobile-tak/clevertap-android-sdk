@@ -8,6 +8,7 @@ buildscript {
         maven {
             url 'https://developer.huawei.com/repo/'
         }
+        maven { url "https://jitpack.io" }
 
     }
     dependencies {
@@ -39,6 +40,7 @@ allprojects {
 
 apply plugin: 'jacoco'
 apply plugin: 'org.sonarqube'
+apply plugin: 'maven-publish'
 
 sonarqube {
     properties {
