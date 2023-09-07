@@ -7,34 +7,28 @@ apply from: "${project.rootDir}/gradle-scripts/jacoco_root.gradle"
 
 ext {
     Repo = 'Maven'
-    publishedGroupId = 'com.github.mobile-tak'
+    publishedGroupId = 'com.github.mobile-tak.clevertap-android-sdk'
 
     siteUrl = 'https://github.com/mobile-tak/clevertap-android-sdk'
     gitUrl = 'https://github.com/mobile-tak/clevertap-android-sdk.git'
 
-    developerId = 'mobiletak'
-    developerName = 'mobiletak'
-    developerEmail = 'servicesfortaks@gmail.com'
+    developerId = 'clevertap'
+    developerName = 'CleverTap'
+    developerEmail = 'support@clevertap.com'
 }
 
-ext["signing.keyId"] = ''
-ext["signing.password"] = ''
-ext["signing.secretKeyRingFile"] = ''
-ext["ossrhUsername"] = ''
-ext["ossrhPassword"] = ''
-ext["sonatypeStagingProfileId"] = ''
 
 version = libraryVersion
 group = publishedGroupId
-
+//
 def (major,minor,patch) = libraryVersion.split("\\.")
-
+//
 android {
     compileSdkVersion Android.compileSdkVersionVal
     buildToolsVersion Android.buildToolsVersionVal
 
     defaultConfig {
-        minSdkVersion Android.minSdkVersionVal
+        minSdkVersion minSdkVersionVal
         targetSdkVersion Android.targetSdkVersionVal
         versionCode "${major}0${minor}0${patch}".toInteger()
         versionName libraryVersion
@@ -58,6 +52,7 @@ android {
                     "\"!SDK-VERSION-STRING!:$publishedGroupId:$artifact:$major.$minor.$patch.0\""
         }
         release {
+
             //only true when a command is run with argument, like this : `gradle <command>  -Pcoverage='true'
             if(project.hasProperty('coverage') && project.property('coverage')=='true') {
                 System.out.println("coverage="+project.property('coverage'))
@@ -94,29 +89,23 @@ android {
             }
         }
     }
-
-    publishing {
-        singleVariant("release") {
-            withSourcesJar()
-        }
-    }
 }
-
-Properties properties = new Properties()
-if (project.rootProject.file('local.properties').exists()) {
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-    properties.each { name, value ->
-        ext[name] = value
-    }
-}else{
-    ext["signing.keyId"] = System.getenv('SIGNING_KEY_ID')
-    ext["signing.password"] = System.getenv('SIGNING_PASSWORD')
-    ext["signing.secretKeyRingFile"] = System.getenv('SIGNING_SECRET_KEY_RING_FILE')
-    ext["ossrhUsername"] = System.getenv('OSSRH_USERNAME')
-    ext["ossrhPassword"] = System.getenv('OSSRH_PASSWORD')
-    ext["sonatypeStagingProfileId"] = System.getenv('SONATYPE_STAGING_PROFILE_ID')
-}
-
+//
+//Properties properties = new Properties()
+//if (project.rootProject.file('local.properties').exists()) {
+//    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+//    properties.each { name, value ->
+//        ext[name] = value
+//    }
+//}else{
+//    ext["signing.keyId"] = System.getenv('SIGNING_KEY_ID')
+//    ext["signing.password"] = System.getenv('SIGNING_PASSWORD')
+//    ext["signing.secretKeyRingFile"] = System.getenv('SIGNING_SECRET_KEY_RING_FILE')
+//    ext["ossrhUsername"] = System.getenv('OSSRH_USERNAME')
+//    ext["ossrhPassword"] = System.getenv('OSSRH_PASSWORD')
+//    ext["sonatypeStagingProfileId"] = System.getenv('SONATYPE_STAGING_PROFILE_ID')
+//}
+//
 task sourcesJar(type: Jar) {
     baseName "$artifact"
     from android.sourceSets.main.java.srcDirs
@@ -126,7 +115,7 @@ task sourcesJar(type: Jar) {
 artifacts {
     archives sourcesJar
 }
-
+//
 afterEvaluate {
     publishing {
         publications {
@@ -140,7 +129,7 @@ afterEvaluate {
                 artifactId artifact
                 version version
 
-//                artifact sourcesJar
+                artifact sourcesJar
 
                 pom {
                     name = artifact
@@ -153,14 +142,6 @@ afterEvaluate {
                             url = licenseUrl
                         }
                     }
-//                    developers {
-//                        developer {
-//                            id = developerId
-//                            name = developerName
-//                            email = developerEmail
-//                        }
-//                        // Add all other devs here...
-//                    }
                     // Version control info - if you're using GitHub, follow the format as seen here
                     scm {
                         connection = 'scm:git:github.com/mobile-tak/clevertap-android-sdk.git'
@@ -170,24 +151,8 @@ afterEvaluate {
                 }
             }
         }
-        // The repository to publish to, Sonatype/MavenCentral
-        repositories {
-            maven {
-                // This is an arbitrary name, you may also use "mavencentral" or
-                // any other name that's descriptive for you
-                name = Repo
-                url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-                credentials {
-                    username ossrhUsername
-                    password ossrhPassword
-                }
-            }
-        }
     }
 }
 
-//signing {
-//    sign publishing.publications
-//}
 apply from: "${project.rootDir}/gradle-scripts/checkstyle.gradle"
 apply from: "${project.rootDir}/gradle-scripts/detekt.gradle"
