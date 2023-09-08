@@ -28,6 +28,7 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.RestrictTo;
 import androidx.annotation.RestrictTo.Scope;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.clevertap.android.sdk.AnalyticsManager;
 import com.clevertap.android.sdk.CTXtensions;
@@ -960,7 +961,7 @@ public class PushProviders implements CTPushProviderListener {
         notificationQueue.add(notificationId);
         if (notificationQueue.size() > 6) {
             Integer id = notificationQueue.remove();
-            notificationManager.cancel(id);
+            NotificationManagerCompat.from(context).cancel(id);
         }
 
         String channelId = extras.getString(Constants.WZRK_CHANNEL_ID, "");
