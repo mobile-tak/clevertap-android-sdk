@@ -21,7 +21,7 @@ object Libs {
 
     const val coordinatorlayout: String = "androidx.coordinatorlayout:coordinatorlayout:_"
 
-    const val androidx_core_core: String = "androidx.core:core:1.3.0"
+    const val androidx_core_core: String = "androidx.core:core:_"
 
     const val core_ktx: String = "androidx.core:core-ktx:_"
 
@@ -33,7 +33,7 @@ object Libs {
 
     const val databinding_runtime: String = "androidx.databinding:databinding-runtime:_"
 
-    const val fragment: String = "androidx.fragment:fragment:1.3.6"
+    const val fragment: String = "androidx.fragment:fragment:_"
 
     const val fragment_ktx: String = "androidx.fragment:fragment-ktx:_"
 
