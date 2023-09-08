@@ -11,6 +11,7 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import androidx.annotation.Nullable;
@@ -65,7 +66,7 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
         String icoPath = extras.getString(Constants.NOTIF_ICON);// uncommon
 
         // uncommon - START
-        NotificationCompat.Style style;
+//        NotificationCompat.Style style;
 //        String bigPictureUrl = extras.getString(Constants.WZRK_BIG_PICTURE);
 //        if (bigPictureUrl != null && bigPictureUrl.startsWith("http")) {
 //            DownloadedBitmap downloadedBitmap = DownloadedBitmapFactory.INSTANCE.nullBitmapWithStatus(Status.INIT_ERROR);
@@ -120,6 +121,8 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
             nb.setColorized(true);
         }// uncommon
 
+        String grpKey = getRandomString(10);
+
         // uncommon
         nb.setContentTitle(notifTitle)
                 .setContentText(notifMessage)
@@ -127,7 +130,10 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
                 .setAutoCancel(true)
                 .setSmallIcon(smallIcon)
                 .setShowWhen(false)
-                .setGroup(getRandomString(10));
+                .setWhen(0L);
+//                .setGroup(grpKey);
+
+        Log.i("ClevertapCustom", "Custom notification shown. Show when - false, group key" + grpKey);
 
         RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification_layout);
         contentView.setImageViewResource(R.id.image, R.drawable.ic_stat_name);
