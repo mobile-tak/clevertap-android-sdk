@@ -369,7 +369,7 @@ public class CleverTapAPI implements CTInboxActivity.InboxActivityListener {
                                 channelName,
                                 importance);
                         notificationChannel.setDescription(channelDescription);
-                        notificationChannel.setGroup(groupId);
+//                        notificationChannel.setGroup(groupId);
                         notificationChannel.setShowBadge(showBadge);
                         notificationManager.createNotificationChannel(notificationChannel);
                         instance.getConfigLogger().info(instance.getAccountId(),
@@ -523,7 +523,7 @@ public class CleverTapAPI implements CTInboxActivity.InboxActivityListener {
                                 channelName,
                                 importance);
                         notificationChannel.setDescription(channelDescription);
-                        notificationChannel.setGroup(groupId);
+//                        notificationChannel.setGroup(groupId);
                         notificationChannel.setShowBadge(showBadge);
                         if (soundUri != null) {
                             notificationChannel.setSound(soundUri,
