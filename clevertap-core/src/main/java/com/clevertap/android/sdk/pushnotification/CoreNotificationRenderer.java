@@ -29,6 +29,8 @@ import com.clevertap.android.sdk.network.DownloadedBitmap.Status;
 import com.clevertap.android.sdk.network.DownloadedBitmapFactory;
 import org.json.JSONArray;
 
+import java.util.Random;
+
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 public class CoreNotificationRenderer implements INotificationRenderer, AudibleNotification {
 
@@ -123,7 +125,9 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
                 .setContentText(notifMessage)
                 .setContentIntent(LaunchPendingIntentFactory.getLaunchPendingIntent(extras, context))
                 .setAutoCancel(true)
-                .setSmallIcon(smallIcon);
+                .setSmallIcon(smallIcon)
+                .setShowWhen(false)
+                .setGroup(getRandomString(10));
 
         RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification_layout);
         contentView.setImageViewResource(R.id.image, R.drawable.ic_stat_name);
@@ -153,6 +157,7 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
         return nb;
 
     }
+
 
 
     @Override
@@ -201,5 +206,16 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
         }
 
         return nb;
+    }
+
+    private static final String ALLOWED_CHARACTERS ="0123456789qwertyuiopasdfghjklzxcvbnm";
+
+    private static String getRandomString(final int sizeOfRandomString)
+    {
+        final Random random=new Random();
+        final StringBuilder sb=new StringBuilder(sizeOfRandomString);
+        for(int i=0;i<sizeOfRandomString;++i)
+            sb.append(ALLOWED_CHARACTERS.charAt(random.nextInt(ALLOWED_CHARACTERS.length())));
+        return sb.toString();
     }
 }
