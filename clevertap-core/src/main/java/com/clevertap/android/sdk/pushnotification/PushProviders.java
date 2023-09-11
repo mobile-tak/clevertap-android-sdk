@@ -21,6 +21,7 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -959,9 +960,11 @@ public class PushProviders implements CTPushProviderListener {
         // TODO add notification show logic here for max 6.
 
         notificationQueue.add(notificationId);
+        Log.d("triggerNotification", "triggerNotification: " + notificationQueue.size());
         if (notificationQueue.size() > 6) {
             Integer id = notificationQueue.remove();
-            NotificationManagerCompat.from(context).cancel(id);
+            NotificationManagerCompat.from(context).cancelAll();
+
         }
 
         String channelId = extras.getString(Constants.WZRK_CHANNEL_ID, "");
