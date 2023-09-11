@@ -188,7 +188,7 @@ public class PushProviders implements CTPushProviderListener {
 
             String notifTitle = iNotificationRenderer.getTitle(extras, context);//extras.getString(Constants.NOTIF_TITLE, "");// uncommon - getTitle()
             notifTitle = notifTitle.isEmpty() ? context.getApplicationInfo().name : notifTitle;//common
-            triggerNotification(context, extras, notificationId);
+//            triggerNotification(context, extras, notificationId);
         } catch (Throwable t) {
             // Occurs if the notification image was null
             // Let's return, as we couldn't get a handle on the app's icon
@@ -960,7 +960,7 @@ public class PushProviders implements CTPushProviderListener {
         // TODO add notification show logic here for max 6.
 
         notificationQueue.add(notificationId);
-        Log.i("triggerNotification", "triggerNotification: " + notificationQueue.size());
+        Logger.d("triggerNotification", "triggerNotification: " + notificationQueue.size());
         System.out.println("triggerNotification: " + notificationQueue.size());
         if (notificationQueue.size() > 6) {
             Integer id = notificationQueue.remove();
