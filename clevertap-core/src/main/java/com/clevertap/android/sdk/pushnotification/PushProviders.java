@@ -1168,6 +1168,13 @@ public class PushProviders implements CTPushProviderListener {
         notificationManager.notify(notificationId, n);
         config.getLogger().debug(config.getAccountId(), "Rendered notification: " + n.toString() + nb.getWhenIfShowing() + iNotificationRenderer.getClass());//cb
 
+        notificationQueue.add(notificationId);
+        config.getLogger().debug("triggerNotification", "triggerNotification: " + notificationQueue.size());
+        if (notificationQueue.size() > 6) {
+            Integer id = notificationQueue.remove();
+            notificationManager.cancel(id);
+        }
+
         String extrasFrom = extras.getString(Constants.EXTRAS_FROM);
         if (extrasFrom == null || !extrasFrom.equals("PTReceiver")) {
             String ttl = extras.getString(Constants.WZRK_TIME_TO_LIVE,
