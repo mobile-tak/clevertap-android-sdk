@@ -58,6 +58,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.concurrent.Callable;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -95,6 +97,8 @@ public class PushProviders implements CTPushProviderListener {
     private final Object pushRenderingLock = new Object();
 
     private DevicePushTokenRefreshListener tokenRefreshListener;
+
+    private Queue<Integer> notificationQueue = new PriorityQueue<Integer>();
 
     /**
      * Factory method to load push providers.
