@@ -132,7 +132,7 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
                 .setAutoCancel(true)
                 .setSmallIcon(smallIcon)
                 .setShowWhen(false)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(notifMessage))
+                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                 .setGroup(grpKey);
 //                .setGroupSummary(false);
 
