@@ -131,11 +131,11 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
                 .setAutoCancel(true)
                 .setSmallIcon(smallIcon)
                 .setShowWhen(false)
-                .setWhen(0L)
-                .setGroup(grpKey);
-//                .setGroupSummary(true);
+                .setGroup(grpKey)
+                .setGroupSummary(false);
 
-        Log.i("ClevertapCustom", "Custom notification shown. Show when - false, group key" + grpKey);
+        config.getLogger()
+                .debug(config.getAccountId(),"Custom notification shown. Show when - false, group key" + grpKey);
 
         RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification_layout);
         contentView.setImageViewResource(R.id.image, R.drawable.ic_stat_name);
