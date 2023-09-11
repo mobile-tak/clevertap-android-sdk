@@ -1003,6 +1003,8 @@ public class PushProviders implements CTPushProviderListener {
             return;
         }
 
+        config.getLogger().debug("triggerNotification","data" + extras);
+
         String channelId = extras.getString(Constants.WZRK_CHANNEL_ID, "");
         String updatedChannelId = null;
         final boolean requiresChannelId = VERSION.SDK_INT >= VERSION_CODES.O;
