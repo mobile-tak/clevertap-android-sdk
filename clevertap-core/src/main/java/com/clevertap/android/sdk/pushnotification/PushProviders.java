@@ -1013,7 +1013,7 @@ public class PushProviders implements CTPushProviderListener {
         config.getLogger().debug("triggerNotification", "triggerNotification: " + notificationQueue.size());
         if (notificationQueue.size() > 6) {
             Integer id = notificationQueue.remove();
-            NotificationManagerCompat.from(context).cancel(id);
+//            NotificationManagerCompat.from(context).cancel(id);
 
         }
 
