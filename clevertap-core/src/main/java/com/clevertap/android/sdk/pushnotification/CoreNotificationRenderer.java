@@ -1,6 +1,7 @@
 package com.clevertap.android.sdk.pushnotification;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -131,6 +132,7 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
                 .setAutoCancel(true)
                 .setSmallIcon(smallIcon)
                 .setShowWhen(false)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(notifMessage))
                 .setGroup(grpKey);
 //                .setGroupSummary(false);
 
