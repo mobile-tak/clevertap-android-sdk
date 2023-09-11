@@ -140,7 +140,7 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
         RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification_layout);
         contentView.setImageViewResource(R.id.image, R.drawable.ic_stat_name);
         contentView.setTextViewText(R.id.title, Html.fromHtml(notifMessage));
-        nb.setCustomBigContentView(contentView);
+        nb.setCustomContentView(contentView);
 
         // uncommon
 //        nb.setLargeIcon(Utils.getNotificationBitmapWithTimeout(icoPath, true, context,
