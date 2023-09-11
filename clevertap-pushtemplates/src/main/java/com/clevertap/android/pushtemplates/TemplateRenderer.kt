@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.*
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.Builder
@@ -112,6 +113,7 @@ class TemplateRenderer : INotificationRenderer, AudibleNotification {
         config: CleverTapInstanceConfig,
         notificationId: Int
     ): NotificationCompat.Builder? {
+        Log.i("CTTemplate","in template renderer" + templateType)
         if (pt_id == null) {
             PTLog.verbose("Template ID not provided. Cannot create the notification")
             return null

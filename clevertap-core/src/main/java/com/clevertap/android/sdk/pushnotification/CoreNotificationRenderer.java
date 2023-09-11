@@ -124,14 +124,15 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
         String grpKey = getRandomString(10);
 
         // uncommon
-        nb.setContentTitle(notifTitle)
+        nb
+//                .setContentTitle(notifTitle)
                 .setContentText(notifMessage)
                 .setContentIntent(LaunchPendingIntentFactory.getLaunchPendingIntent(extras, context))
                 .setAutoCancel(true)
                 .setSmallIcon(smallIcon)
                 .setShowWhen(false)
-                .setWhen(0L);
-//                .setGroup(grpKey)
+                .setWhen(0L)
+                .setGroup(grpKey);
 //                .setGroupSummary(true);
 
         Log.i("ClevertapCustom", "Custom notification shown. Show when - false, group key" + grpKey);

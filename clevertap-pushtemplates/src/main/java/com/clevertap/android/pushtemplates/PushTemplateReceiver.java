@@ -29,6 +29,7 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 import androidx.core.app.NotificationCompat;
@@ -171,18 +172,23 @@ public class PushTemplateReceiver extends BroadcastReceiver {
                                 if (templateType != null) {
                                     switch (templateType) {
                                         case RATING:
+                                            Log.i("PTemplate","setting style RATING");
                                             handleRatingNotification(context, extras, intent);
                                             break;
                                         case FIVE_ICONS:
+                                            Log.i("PTemplate","setting style FIVE ICONS");
                                             handleFiveCTANotification(context, extras);
                                             break;
                                         case PRODUCT_DISPLAY:
+                                            Log.i("PTemplate","setting style Product display");
                                             handleProductDisplayNotification(context, extras);
                                             break;
                                         case INPUT_BOX:
+                                            Log.i("PTemplate","setting style Input box");
                                             handleInputBoxNotification(context, extras, intent);
                                             break;
                                         case MANUAL_CAROUSEL:
+                                            Log.i("PTemplate","setting style Manual carousel");
                                             handleManualCarouselNotification(context, extras);
                                             break;
                                     }
