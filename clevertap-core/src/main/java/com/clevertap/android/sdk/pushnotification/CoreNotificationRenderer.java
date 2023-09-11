@@ -131,8 +131,8 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
                 .setAutoCancel(true)
                 .setSmallIcon(smallIcon)
                 .setShowWhen(false)
-                .setGroup(grpKey)
-                .setGroupSummary(false);
+                .setGroup(grpKey);
+//                .setGroupSummary(false);
 
         config.getLogger()
                 .debug(config.getAccountId(),"Custom notification shown. Show when - false, group key" + grpKey);
@@ -140,7 +140,7 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
         RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification_layout);
         contentView.setImageViewResource(R.id.image, R.drawable.ic_stat_name);
         contentView.setTextViewText(R.id.title, Html.fromHtml(notifMessage));
-        nb.setCustomContentView(contentView);
+        nb.setCustomBigContentView(contentView);
 
         // uncommon
 //        nb.setLargeIcon(Utils.getNotificationBitmapWithTimeout(icoPath, true, context,
