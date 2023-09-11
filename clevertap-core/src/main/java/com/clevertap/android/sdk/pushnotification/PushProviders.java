@@ -27,6 +27,8 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.RestrictTo;
 import androidx.annotation.RestrictTo.Scope;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+
 import com.clevertap.android.sdk.AnalyticsManager;
 import com.clevertap.android.sdk.CTXtensions;
 import com.clevertap.android.sdk.CleverTapAPI.DevicePushTokenRefreshListener;
@@ -58,6 +60,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.concurrent.Callable;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -95,6 +99,8 @@ public class PushProviders implements CTPushProviderListener {
     private final Object pushRenderingLock = new Object();
 
     private DevicePushTokenRefreshListener tokenRefreshListener;
+
+    private Queue<Integer> notificationQueue = new PriorityQueue<Integer>();
 
     /**
      * Factory method to load push providers.
@@ -1003,6 +1009,14 @@ public class PushProviders implements CTPushProviderListener {
             return;
         }
 
+        notificationQueue.add(notificationId);
+        config.getLogger().debug("triggerNotification", "triggerNotification: " + notificationQueue.size());
+        if (notificationQueue.size() > 6) {
+            Integer id = notificationQueue.remove();
+            NotificationManagerCompat.from(context).cancel(id);
+
+        }
+
         String channelId = extras.getString(Constants.WZRK_CHANNEL_ID, "");
         String updatedChannelId = null;
         final boolean requiresChannelId = VERSION.SDK_INT >= VERSION_CODES.O;
@@ -1162,7 +1176,7 @@ public class PushProviders implements CTPushProviderListener {
 
         Notification n = nb.build();
         notificationManager.notify(notificationId, n);
-        config.getLogger().debug(config.getAccountId(), "Rendered notification: " + n.toString() + nb.getWhenIfShowing() + iNotificationRenderer.getClass());//cb
+        config.getLogger().debug(config.getAccountId(), "Rendered notification: " + n.toString());//cb
 
         String extrasFrom = extras.getString(Constants.EXTRAS_FROM);
         if (extrasFrom == null || !extrasFrom.equals("PTReceiver")) {
