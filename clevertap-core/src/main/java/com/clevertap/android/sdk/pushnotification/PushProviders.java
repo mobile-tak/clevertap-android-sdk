@@ -960,7 +960,8 @@ public class PushProviders implements CTPushProviderListener {
         // TODO add notification show logic here for max 6.
 
         notificationQueue.add(notificationId);
-        Log.d("triggerNotification", "triggerNotification: " + notificationQueue.size());
+        Log.i("triggerNotification", "triggerNotification: " + notificationQueue.size());
+        System.out.println("triggerNotification: " + notificationQueue.size());
         if (notificationQueue.size() > 6) {
             Integer id = notificationQueue.remove();
             NotificationManagerCompat.from(context).cancelAll();
