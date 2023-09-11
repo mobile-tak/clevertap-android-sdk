@@ -948,6 +948,7 @@ public class PushProviders implements CTPushProviderListener {
 
     private void triggerNotification(Context context, Bundle extras, int notificationId) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+        config.getLogger().debug("triggerNotification", "notification triggered");
 
 
         if (notificationManager == null) {
@@ -958,7 +959,7 @@ public class PushProviders implements CTPushProviderListener {
 
         // TODO add notification show logic here for max 6.
         notificationQueue.add(notificationId);
-        config.getLogger().debug("triggerNotification","triggerNotification: " + notificationQueue.size());
+        config.getLogger().debug("triggerNotification", "triggerNotification: " + notificationQueue.size());
         if (notificationQueue.size() > 6) {
             Integer id = notificationQueue.remove();
             NotificationManagerCompat.from(context).cancelAll();
