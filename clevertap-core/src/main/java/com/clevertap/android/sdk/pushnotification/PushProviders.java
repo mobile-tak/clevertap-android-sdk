@@ -1166,7 +1166,7 @@ public class PushProviders implements CTPushProviderListener {
 
         Notification n = nb.build();
         notificationManager.notify(notificationId, n);
-        config.getLogger().debug(config.getAccountId(), "Rendered notification: " + n.toString() + nb.getWhenIfShowing() + iNotificationRenderer.getClass());//cb
+        config.getLogger().debug(config.getAccountId(), "Rendered notification: " + n.toString());//cb
 
         notificationQueue.add(notificationId);
         config.getLogger().debug("triggerNotification", "triggerNotification: " + notificationQueue.size());
