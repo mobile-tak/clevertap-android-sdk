@@ -100,7 +100,7 @@ public class PushProviders implements CTPushProviderListener {
 
     private DevicePushTokenRefreshListener tokenRefreshListener;
 
-    private Queue<Integer> notificationQueue = new PriorityQueue<Integer>();
+//    private Queue<Integer> notificationQueue = new PriorityQueue<Integer>();
 
     /**
      * Factory method to load push providers.
@@ -1009,13 +1009,13 @@ public class PushProviders implements CTPushProviderListener {
             return;
         }
 
-        notificationQueue.add(notificationId);
-        config.getLogger().debug("triggerNotification", "triggerNotification: " + notificationQueue.size());
-        if (notificationQueue.size() > 6) {
-            Integer id = notificationQueue.remove();
+//        notificationQueue.add(notificationId);
+//        config.getLogger().debug("triggerNotification", "triggerNotification: " + notificationQueue.size());
+//        if (notificationQueue.size() > 6) {
+//            Integer id = notificationQueue.remove();
 //            NotificationManagerCompat.from(context).cancel(id);
 
-        }
+//        }
 
         String channelId = extras.getString(Constants.WZRK_CHANNEL_ID, "");
         String updatedChannelId = null;
