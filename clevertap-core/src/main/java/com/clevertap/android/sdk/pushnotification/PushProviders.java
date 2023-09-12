@@ -100,8 +100,7 @@ public class PushProviders implements CTPushProviderListener {
 
     private DevicePushTokenRefreshListener tokenRefreshListener;
 
-//    private Queue<Integer> notificationQueue = new PriorityQueue<Integer>();
-
+    private Queue<Integer> notificationQueue = new PriorityQueue<Integer>();
     /**
      * Factory method to load push providers.
      *
@@ -1177,7 +1176,17 @@ public class PushProviders implements CTPushProviderListener {
         Notification n = nb.build();
         notificationManager.notify(notificationId, n);
         config.getLogger().debug(config.getAccountId(), "Rendered notification: " + n.toString());//cb
-
+         
+        // logic for notificatons limit on notification bar
+        notificationQueue.add(notificationId);
+        config.getLogger().debug("triggerNotification", "triggerNotification: " + notificationQueue.size());
+        if (notificationQueue.size() > 6) {
+            Integer id = notificationQueue.remove();
+            notificationManager.cancel(id);
+        }
+      
+      
+      
         String extrasFrom = extras.getString(Constants.EXTRAS_FROM);
         if (extrasFrom == null || !extrasFrom.equals("PTReceiver")) {
             String ttl = extras.getString(Constants.WZRK_TIME_TO_LIVE,
