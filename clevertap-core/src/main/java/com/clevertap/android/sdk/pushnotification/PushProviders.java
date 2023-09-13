@@ -16,11 +16,13 @@ import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.TextUtils;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -53,6 +55,7 @@ import com.clevertap.android.sdk.utils.PackageUtils;
 import com.clevertap.android.sdk.validation.ValidationResult;
 import com.clevertap.android.sdk.validation.ValidationResultFactory;
 import com.clevertap.android.sdk.validation.ValidationResultStack;
+
 import java.lang.reflect.Constructor;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -63,6 +66,7 @@ import java.util.Locale;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.Callable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -100,7 +104,7 @@ public class PushProviders implements CTPushProviderListener {
 
     private DevicePushTokenRefreshListener tokenRefreshListener;
 
-    private Queue<Integer> notificationQueue = new PriorityQueue<Integer>();
+
     /**
      * Factory method to load push providers.
      *
@@ -114,7 +118,7 @@ public class PushProviders implements CTPushProviderListener {
                                      AnalyticsManager analyticsManager, ControllerManager controllerManager,
                                      CTWorkManager ctWorkManager) {
         PushProviders providers = new PushProviders(context, config, baseDatabaseManager, validationResultStack,
-                analyticsManager,ctWorkManager);
+                analyticsManager, ctWorkManager);
         providers.init();
         controllerManager.setPushProviders(providers);
         return providers;
@@ -1008,13 +1012,6 @@ public class PushProviders implements CTPushProviderListener {
             return;
         }
 
-//        notificationQueue.add(notificationId);
-//        config.getLogger().debug("triggerNotification", "triggerNotification: " + notificationQueue.size());
-//        if (notificationQueue.size() > 6) {
-//            Integer id = notificationQueue.remove();
-//            NotificationManagerCompat.from(context).cancel(id);
-
-//        }
 
         String channelId = extras.getString(Constants.WZRK_CHANNEL_ID, "");
         String updatedChannelId = null;
@@ -1048,7 +1045,7 @@ public class PushProviders implements CTPushProviderListener {
             }
 
             // if channel is blocked by user then do not render push
-            if (!CTXtensions.isNotificationChannelEnabled(context,updatedChannelId)) {
+            if (!CTXtensions.isNotificationChannelEnabled(context, updatedChannelId)) {
                 config.getLogger()
                         .verbose(config.getAccountId(),
                                 "Not rendering push notification as channel = " + updatedChannelId + " is blocked by user");
@@ -1176,17 +1173,17 @@ public class PushProviders implements CTPushProviderListener {
         Notification n = nb.build();
         notificationManager.notify(notificationId, n);
         config.getLogger().debug(config.getAccountId(), "Rendered notification: " + n.toString());//cb
-         
-        // logic for notificatons limit on notification bar
-        notificationQueue.add(notificationId);
-        config.getLogger().debug("triggerNotification", "triggerNotification: " + notificationQueue.size());
-        if (notificationQueue.size() > 6) {
-            Integer id = notificationQueue.remove();
+
+        // TODO  logic for notifications limit on notification bar
+        QueueSharedPreferences.enqueue(context, notificationId);
+        int queueSize = QueueSharedPreferences.getQueueSize(context);
+        config.getLogger().debug("triggerNotification", "triggerNotification: " + queueSize);
+        if (queueSize > 6) {
+            Integer id = QueueSharedPreferences.dequeue(context);
             notificationManager.cancel(id);
         }
-      
-      
-      
+
+
         String extrasFrom = extras.getString(Constants.EXTRAS_FROM);
         if (extrasFrom == null || !extrasFrom.equals("PTReceiver")) {
             String ttl = extras.getString(Constants.WZRK_TIME_TO_LIVE,

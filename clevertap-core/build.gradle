@@ -51,6 +51,7 @@ dependencies {
     androidTestImplementation "androidx.test.uiautomator:uiautomator:2.3.0-alpha03"
     // Optional -- UI testing with Compose
     androidTestImplementation Libs.androidx_test_ext_junit
+    implementation 'com.google.code.gson:gson:2.10.1'
 
 //    implementation project(path: ':clevertap-geofence')
 //    implementation project(path: ':clevertap-hms')
