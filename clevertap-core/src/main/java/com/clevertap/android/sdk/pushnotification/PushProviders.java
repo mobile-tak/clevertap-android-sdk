@@ -1120,7 +1120,7 @@ public class PushProviders implements CTPushProviderListener {
 
             for (StatusBarNotification activeNotification : activeNotifications) {
                 activeNotificationsPayload.add(activeNotification.getId());
-
+                config.getLogger().debug("triggerNotification", "triggerNotification: " + activeNotification.getNotification().extras.getString(Constants.NOTIF_MSG) + activeNotification.getPostTime());
             }
 
             config.getLogger().debug("triggerNotification", "triggerNotification: " + activeNotificationsPayload.size());
