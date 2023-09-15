@@ -1114,7 +1114,7 @@ public class PushProviders implements CTPushProviderListener {
             //  This logic works only for andoird api level 23
             StatusBarNotification[] activeNotifications = notificationManager.getActiveNotifications();
 
-            Queue<Integer> activeNotificationsPayload = new PriorityQueue<>();
+            List<Integer> activeNotificationsPayload = new ArrayList<>();
 
             Arrays.sort(activeNotifications,postTimeComparator );
 
@@ -1125,7 +1125,7 @@ public class PushProviders implements CTPushProviderListener {
 
             config.getLogger().debug("triggerNotification", "triggerNotification: " + activeNotificationsPayload.size());
             while (activeNotificationsPayload.size() > 6) {
-                Integer id = activeNotificationsPayload.remove();
+                Integer id = activeNotificationsPayload.remove(0);
                 notificationManager.cancel(id);
             }
         }
