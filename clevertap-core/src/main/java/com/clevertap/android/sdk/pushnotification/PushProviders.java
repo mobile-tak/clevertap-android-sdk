@@ -60,7 +60,10 @@ import com.clevertap.android.sdk.validation.ValidationResultStack;
 import java.lang.reflect.Constructor;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -1111,8 +1114,9 @@ public class PushProviders implements CTPushProviderListener {
             //  This logic works only for andoird api level 23
             StatusBarNotification[] activeNotifications = notificationManager.getActiveNotifications();
 
-            Queue<Integer> activeNotificationsPayload = new LinkedList<>();
+            Queue<Integer> activeNotificationsPayload = new PriorityQueue<>();
 
+            Arrays.sort(activeNotifications,postTimeComparator );
 
             for (StatusBarNotification activeNotification : activeNotifications) {
                 activeNotificationsPayload.add(activeNotification.getId());
@@ -1120,7 +1124,7 @@ public class PushProviders implements CTPushProviderListener {
             }
 
             config.getLogger().debug("triggerNotification", "triggerNotification: " + activeNotificationsPayload.size());
-            if (activeNotificationsPayload.size() > 6) {
+            while (activeNotificationsPayload.size() > 6) {
                 Integer id = activeNotificationsPayload.remove();
                 notificationManager.cancel(id);
             }
@@ -1154,4 +1158,12 @@ public class PushProviders implements CTPushProviderListener {
 
             }
         }
+
+    Comparator<StatusBarNotification> postTimeComparator = new Comparator<StatusBarNotification>() {
+        @Override
+        public int compare(StatusBarNotification sbn1, StatusBarNotification sbn2) {
+            // compare the post times
+            return Long.compare(sbn1.getPostTime(), sbn2.getPostTime());
+        }
+    };
     }
