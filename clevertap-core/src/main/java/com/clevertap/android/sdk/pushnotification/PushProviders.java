@@ -1217,10 +1217,21 @@ public class PushProviders implements CTPushProviderListener {
                     .setCustomBigContentView(contentView)
                     .setCustomHeadsUpContentView(contentView);
 
+            config.getLogger()
+                    .debug(config.getAccountId(),"Re triggered notification custom view done");
+
+
             // set priority build and notify
             nb.setPriority(NotificationCompat.PRIORITY_MAX);
-            Notification notif = nb.build();
-            nm.notify(notification.getId(), notif);
+            try {
+                Notification notif = nb.build();
+                nm.notify(notification.getId(), notif);
+            } catch (Exception e) {
+                config.getLogger()
+                        .debug(config.getAccountId(),"Re triggered notification" + " "+e.toString());
+            }
+
+
 
         }
 
