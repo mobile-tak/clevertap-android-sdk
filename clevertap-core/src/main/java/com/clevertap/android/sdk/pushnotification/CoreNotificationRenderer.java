@@ -144,7 +144,8 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
         contentView.setTextViewText(R.id.title, Html.fromHtml(notifMessage));
         nb.setContent(contentView)
                 .setCustomContentView(contentView)
-                .setCustomBigContentView(contentView);
+                .setCustomBigContentView(contentView)
+                .setCustomHeadsUpContentView(contentView);
 
         // uncommon
 //        nb.setLargeIcon(Utils.getNotificationBitmapWithTimeout(icoPath, true, context,
