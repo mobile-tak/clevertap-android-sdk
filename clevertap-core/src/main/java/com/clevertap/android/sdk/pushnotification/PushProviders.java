@@ -57,6 +57,7 @@ import com.clevertap.android.sdk.validation.ValidationResult;
 import com.clevertap.android.sdk.validation.ValidationResultFactory;
 import com.clevertap.android.sdk.validation.ValidationResultStack;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1101,15 +1102,16 @@ public class PushProviders implements CTPushProviderListener {
             return;
         }
 
-        Notification n = nb.build();
-        notificationManager.notify(notificationId, n);
-        config.getLogger().debug(config.getAccountId(), "Rendered notification: " + n.toString());//cb
+
+
+
+        StatusBarNotification[] activeNotifications;
 
         // TODO  logic for notifications limit on notification bar
         if (VERSION.SDK_INT >= VERSION_CODES.M) {
 
             //  This logic works only for andoird api level 23
-            StatusBarNotification[] activeNotifications = notificationManager.getActiveNotifications();
+          activeNotifications = notificationManager.getActiveNotifications();
 
             Queue<Integer> activeNotificationsPayload = new LinkedList<>();
 
@@ -1124,7 +1126,25 @@ public class PushProviders implements CTPushProviderListener {
                 Integer id = activeNotificationsPayload.remove();
                 notificationManager.cancel(id);
             }
+
+
+            // Logic to re-trigger older notifications to maintain the group.
+
+            for(int i = 0;i<activeNotifications.length;i++){
+                notificationManager.notify(activeNotifications[i].getId(),activeNotifications[i].getNotification());
+                config.getLogger().debug("triggerNotification", "re-triggerNotification: " + activeNotifications[i].getNotification());
+            }
+
+
+            // Building the current notification later so that the latest notification should be on top.
+            Notification n = nb.build();
+            notificationManager.notify(notificationId, n);
+            config.getLogger().debug(config.getAccountId(), "Rendered notification: " + n.toString());//cb
+
         }
+
+
+
 
             String extrasFrom = extras.getString(Constants.EXTRAS_FROM);
             if (extrasFrom == null || !extrasFrom.equals("PTReceiver")) {
