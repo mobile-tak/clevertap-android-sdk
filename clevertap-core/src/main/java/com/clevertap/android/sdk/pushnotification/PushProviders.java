@@ -3,7 +3,6 @@ package com.clevertap.android.sdk.pushnotification;
 import static android.content.Context.JOB_SCHEDULER_SERVICE;
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static com.clevertap.android.sdk.BuildConfig.VERSION_CODE;
-import static com.clevertap.android.sdk.pushnotification.CoreNotificationRenderer.ALLOWED_CHARACTERS;
 import static com.clevertap.android.sdk.pushnotification.PushNotificationUtil.getPushTypes;
 
 import android.annotation.SuppressLint;
