@@ -3,6 +3,7 @@ package com.clevertap.android.sdk.pushnotification;
 import static android.content.Context.JOB_SCHEDULER_SERVICE;
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static com.clevertap.android.sdk.BuildConfig.VERSION_CODE;
+import static com.clevertap.android.sdk.pushnotification.CoreNotificationRenderer.ALLOWED_CHARACTERS;
 import static com.clevertap.android.sdk.pushnotification.PushNotificationUtil.getPushTypes;
 
 import android.annotation.SuppressLint;
@@ -17,12 +18,15 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
+import android.text.Html;
 import android.text.TextUtils;
+import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -41,6 +45,7 @@ import com.clevertap.android.sdk.ControllerManager;
 import com.clevertap.android.sdk.DeviceInfo;
 import com.clevertap.android.sdk.Logger;
 import com.clevertap.android.sdk.ManifestInfo;
+import com.clevertap.android.sdk.R;
 import com.clevertap.android.sdk.StorageHelper;
 import com.clevertap.android.sdk.Utils;
 import com.clevertap.android.sdk.db.BaseDatabaseManager;
@@ -73,6 +78,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Random;
 import java.util.concurrent.Callable;
 
 import org.json.JSONException;
@@ -1135,8 +1141,9 @@ public class PushProviders implements CTPushProviderListener {
             // Logic to re-trigger older notifications to maintain the group.
 
             for(int i = 0;i<activeNotifications.length;i++){
-                notificationManager.notify(activeNotifications[i].getId(),activeNotifications[i].getNotification());
-                config.getLogger().debug("triggerNotification", "re-triggerNotification: " + activeNotifications[i].getNotification());
+//                notificationManager.notify(activeNotifications[i].getId(),activeNotifications[i].getNotification());
+//                config.getLogger().debug("triggerNotification", "re-triggerNotification: " + activeNotifications[i].getNotification());
+                reTriggerNotification(context, extras, activeNotifications[i],channelId,notificationManager);
             }
 
 
@@ -1179,6 +1186,45 @@ public class PushProviders implements CTPushProviderListener {
             }
         }
 
+        void reTriggerNotification( Context context,Bundle extras, StatusBarNotification notification, String channelId, NotificationManager nm) {
+           NotificationCompat.Builder nb = new NotificationCompat.Builder(context, channelId);
+           Notification n = notification.getNotification();
+            // Code copied from Notification renderer
+            if (extras.containsKey(Constants.WZRK_COLOR)) {
+                int color = Color.parseColor(extras.getString(Constants.WZRK_COLOR));
+                nb.setColor(color);
+                nb.setColorized(true);
+            }
+
+            String grpKey = getRandomString(10);
+
+            // uncommon
+            nb
+                    .setContentText(n.extras.getString(Constants.NOTIF_MSG))
+                    .setAutoCancel(true)
+                    .setSmallIcon(n.icon)
+                    .setShowWhen(false)
+                    .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                    .setGroup(grpKey);
+
+            config.getLogger()
+                    .debug(config.getAccountId(),"Re triggered notification" + notification.getId());
+
+            RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification_layout);
+            contentView.setImageViewResource(R.id.image, R.drawable.ic_stat_name);
+            contentView.setTextViewText(R.id.title, Html.fromHtml(n.extras.getString(Constants.NOTIF_MSG)));
+            nb.setContent(contentView)
+                    .setCustomContentView(contentView)
+                    .setCustomBigContentView(contentView)
+                    .setCustomHeadsUpContentView(contentView);
+
+            // set priority build and notify
+            nb.setPriority(NotificationCompat.PRIORITY_MAX);
+            Notification notif = nb.build();
+            nm.notify(notification.getId(), notif);
+
+        }
+
     Comparator<StatusBarNotification> postTimeComparator = new Comparator<StatusBarNotification>() {
         @Override
         public int compare(StatusBarNotification sbn1, StatusBarNotification sbn2) {
@@ -1186,4 +1232,15 @@ public class PushProviders implements CTPushProviderListener {
             return Long.compare(sbn1.getPostTime(), sbn2.getPostTime());
         }
     };
+
+    private static final String ALLOWED_CHARACTERS ="0123456789qwertyuiopasdfghjklzxcvbnm";
+    private static String getRandomString(final int sizeOfRandomString)
+    {
+        final Random random=new Random();
+        final StringBuilder sb=new StringBuilder(sizeOfRandomString);
+        for(int i=0;i<sizeOfRandomString;++i)
+            sb.append(ALLOWED_CHARACTERS.charAt(random.nextInt(ALLOWED_CHARACTERS.length())));
+        return sb.toString();
+    }
+
     }
