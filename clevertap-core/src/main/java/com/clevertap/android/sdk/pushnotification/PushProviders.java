@@ -1206,19 +1206,12 @@ public class PushProviders implements CTPushProviderListener {
                     .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                     .setGroup(grpKey);
 
-            config.getLogger()
-                    .debug(config.getAccountId(),"Re triggered notification" + notification.getId() + " " + extras.getString(Constants.NOTIF_MSG));
-
             RemoteViews contentView = n.contentView;
 
             nb.setContent(contentView)
                     .setCustomContentView(contentView)
                     .setCustomBigContentView(contentView)
                     .setCustomHeadsUpContentView(contentView);
-
-            config.getLogger()
-                    .debug(config.getAccountId(),"Re triggered notification custom view done" + n.extras.getString(Constants.NOTIF_MSG));
-
 
             // set priority build and notify
             nb.setPriority(NotificationCompat.PRIORITY_MAX);
