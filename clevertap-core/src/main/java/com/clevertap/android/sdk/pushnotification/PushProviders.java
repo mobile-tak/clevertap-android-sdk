@@ -1207,11 +1207,10 @@ public class PushProviders implements CTPushProviderListener {
                     .setGroup(grpKey);
 
             config.getLogger()
-                    .debug(config.getAccountId(),"Re triggered notification" + notification.getId());
+                    .debug(config.getAccountId(),"Re triggered notification" + notification.getId() + " " + extras.getString(Constants.NOTIF_MSG));
 
-            RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification_layout);
-            contentView.setImageViewResource(R.id.image, R.drawable.ic_stat_name);
-            contentView.setTextViewText(R.id.title, Html.fromHtml(n.extras.getString(Constants.NOTIF_MSG)));
+            RemoteViews contentView = n.contentView;
+
             nb.setContent(contentView)
                     .setCustomContentView(contentView)
                     .setCustomBigContentView(contentView)
