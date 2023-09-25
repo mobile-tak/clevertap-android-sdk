@@ -1225,6 +1225,7 @@ public class PushProviders implements CTPushProviderListener {
             try {
                 int notificationId = (int) (Math.random() * 100);
                 Notification notif = nb.build();
+                nm.cancel(notification.getId());
                 nm.notify(notificationId, notif);
             } catch (Exception e) {
                 config.getLogger()
