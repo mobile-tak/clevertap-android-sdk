@@ -1223,8 +1223,9 @@ public class PushProviders implements CTPushProviderListener {
             // set priority build and notify
             nb.setPriority(NotificationCompat.PRIORITY_MAX);
             try {
+                int notificationId = (int) (Math.random() * 100);
                 Notification notif = nb.build();
-                nm.notify(notification.getId(), notif);
+                nm.notify(notificationId, notif);
             } catch (Exception e) {
                 config.getLogger()
                         .debug(config.getAccountId(),"Re triggered notification" + " "+e.toString());
