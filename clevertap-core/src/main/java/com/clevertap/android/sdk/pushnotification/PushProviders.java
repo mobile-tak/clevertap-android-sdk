@@ -1218,7 +1218,7 @@ public class PushProviders implements CTPushProviderListener {
                     .setCustomHeadsUpContentView(contentView);
 
             config.getLogger()
-                    .debug(config.getAccountId(),"Re triggered notification custom view done");
+                    .debug(config.getAccountId(),"Re triggered notification custom view done" + n.extras.getString(Constants.NOTIF_MSG));
 
 
             // set priority build and notify
