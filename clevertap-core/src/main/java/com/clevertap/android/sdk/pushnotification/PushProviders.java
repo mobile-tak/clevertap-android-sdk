@@ -1201,7 +1201,7 @@ public class PushProviders implements CTPushProviderListener {
             // uncommon
             nb
                     .setContentText(n.extras.getString(Constants.NOTIF_MSG))
-                    .setContentIntent(LaunchPendingIntentFactory.getLaunchPendingIntent(n.extras, context))
+                    .setContentIntent(n.contentIntent)
                     .setAutoCancel(true)
                     .setSmallIcon(n.icon)
                     .setShowWhen(false)
@@ -1216,7 +1216,7 @@ public class PushProviders implements CTPushProviderListener {
                     .setCustomHeadsUpContentView(contentView);
 
             config.getLogger()
-                    .debug(config.getAccountId(),"Re triggered notification" + " "+ n.extras);
+                    .debug(config.getAccountId(),"Re triggered notification" + " "+ n.contentIntent);
 
             // set priority build and notify
             nb.setPriority(NotificationCompat.PRIORITY_MAX);
