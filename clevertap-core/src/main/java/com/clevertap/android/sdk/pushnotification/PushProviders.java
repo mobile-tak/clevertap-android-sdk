@@ -1111,19 +1111,17 @@ public class PushProviders implements CTPushProviderListener {
         }
 
 
-
-
         StatusBarNotification[] activeNotifications;
 
         // TODO  logic for notifications limit on notification bar
         if (VERSION.SDK_INT >= VERSION_CODES.M) {
 
             //  This logic works only for andoird api level 23
-          activeNotifications = notificationManager.getActiveNotifications();
+            activeNotifications = notificationManager.getActiveNotifications();
 
             List<Integer> activeNotificationsPayload = new ArrayList<>();
 
-            Arrays.sort(activeNotifications,postTimeComparator );
+            Arrays.sort(activeNotifications, postTimeComparator);
 
             for (StatusBarNotification activeNotification : activeNotifications) {
                 activeNotificationsPayload.add(activeNotification.getId());
@@ -1148,92 +1146,87 @@ public class PushProviders implements CTPushProviderListener {
 
             // Logic to re-trigger older notifications to maintain the group.
 
-            for(int i = 0;i<activeNotifications.length;i++){
-                reTriggerNotification(context, extras, activeNotifications[i],channelId,notificationManager);
-            }
-
-
-
+//            for (int i = 0; i < activeNotifications.length; i++) {
+//
+//                reTriggerNotification(context, extras, activeNotifications[i], channelId, notificationManager);
+//            }
 
         }
 
 
+        String extrasFrom = extras.getString(Constants.EXTRAS_FROM);
+        if (extrasFrom == null || !extrasFrom.equals("PTReceiver")) {
+            String ttl = extras.getString(Constants.WZRK_TIME_TO_LIVE, (System.currentTimeMillis() + Constants.DEFAULT_PUSH_TTL) / 1000 + "");
+            long wzrk_ttl = Long.parseLong(ttl);
+            String wzrk_pid = extras.getString(Constants.WZRK_PUSH_ID);
+            DBAdapter dbAdapter = baseDatabaseManager.loadDBAdapter(context);
+            config.getLogger().verbose("Storing Push Notification..." + wzrk_pid + " - with ttl - " + ttl);
+            dbAdapter.storePushNotificationId(wzrk_pid, wzrk_ttl);
 
-
-            String extrasFrom = extras.getString(Constants.EXTRAS_FROM);
-            if (extrasFrom == null || !extrasFrom.equals("PTReceiver")) {
-                String ttl = extras.getString(Constants.WZRK_TIME_TO_LIVE, (System.currentTimeMillis() + Constants.DEFAULT_PUSH_TTL) / 1000 + "");
-                long wzrk_ttl = Long.parseLong(ttl);
-                String wzrk_pid = extras.getString(Constants.WZRK_PUSH_ID);
-                DBAdapter dbAdapter = baseDatabaseManager.loadDBAdapter(context);
-                config.getLogger().verbose("Storing Push Notification..." + wzrk_pid + " - with ttl - " + ttl);
-                dbAdapter.storePushNotificationId(wzrk_pid, wzrk_ttl);
-
-                boolean notificationViewedEnabled = "true".equals(extras.getString(Constants.WZRK_RNV, ""));
-                if (!notificationViewedEnabled) {
-                    ValidationResult notificationViewedError = ValidationResultFactory.create(512, Constants.NOTIFICATION_VIEWED_DISABLED, extras.toString());
-                    config.getLogger().debug(notificationViewedError.getErrorDesc());
-                    validationResultStack.pushValidationResult(notificationViewedError);
-                    return;
-                }
-
-                long omrStart = extras.getLong(Constants.OMR_INVOKE_TIME_IN_MILLIS, -1);
-                if (omrStart >= 0) {
-                    long prt = System.currentTimeMillis() - omrStart;
-                    config.getLogger().verbose("Rendered Push Notification in " + prt + " millis");
-                }
-
-                ctWorkManager.init();
-                analyticsManager.pushNotificationViewedEvent(extras);
-
-            }
-        }
-
-        @SuppressLint("NotificationTrampoline")
-        void reTriggerNotification(Context context, Bundle extras, StatusBarNotification notification, String channelId, NotificationManager nm) {
-           NotificationCompat.Builder nb = new NotificationCompat.Builder(context, channelId);
-           Notification n = notification.getNotification();
-            // Code copied from Notification renderer
-            if (extras.containsKey(Constants.WZRK_COLOR)) {
-                int color = Color.parseColor(extras.getString(Constants.WZRK_COLOR));
-                nb.setColor(color);
-                nb.setColorized(true);
+            boolean notificationViewedEnabled = "true".equals(extras.getString(Constants.WZRK_RNV, ""));
+            if (!notificationViewedEnabled) {
+                ValidationResult notificationViewedError = ValidationResultFactory.create(512, Constants.NOTIFICATION_VIEWED_DISABLED, extras.toString());
+                config.getLogger().debug(notificationViewedError.getErrorDesc());
+                validationResultStack.pushValidationResult(notificationViewedError);
+                return;
             }
 
-            String grpKey = getRandomString(10);
-
-            // uncommon
-            nb
-                    .setContentText(n.extras.getString(Constants.NOTIF_MSG))
-                    .setContentIntent(n.contentIntent)
-                    .setAutoCancel(true)
-                    .setSmallIcon(n.icon)
-                    .setShowWhen(false)
-                    .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                    .setGroup(grpKey);
-
-            RemoteViews contentView = n.contentView;
-
-            nb.setContent(contentView)
-                    .setCustomContentView(contentView)
-                    .setCustomBigContentView(contentView)
-                    .setCustomHeadsUpContentView(contentView);
-
-            // set priority build and notify
-            nb.setPriority(NotificationCompat.PRIORITY_MAX);
-            try {
-                int notificationId = (int) (Math.random() * 100);
-                Notification notif = nb.build();
-                nm.cancel(notification.getId());
-                nm.notify(notificationId, notif);
-            } catch (Exception e) {
-                config.getLogger()
-                        .debug(config.getAccountId(),"Re triggered notification" + " "+e.toString());
+            long omrStart = extras.getLong(Constants.OMR_INVOKE_TIME_IN_MILLIS, -1);
+            if (omrStart >= 0) {
+                long prt = System.currentTimeMillis() - omrStart;
+                config.getLogger().verbose("Rendered Push Notification in " + prt + " millis");
             }
 
-
+            ctWorkManager.init();
+            analyticsManager.pushNotificationViewedEvent(extras);
 
         }
+    }
+
+    @SuppressLint("NotificationTrampoline")
+    void reTriggerNotification(Context context, Bundle extras, StatusBarNotification notification, String channelId, NotificationManager nm) {
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(context, channelId);
+        Notification n = notification.getNotification();
+        // Code copied from Notification renderer
+        if (extras.containsKey(Constants.WZRK_COLOR)) {
+            int color = Color.parseColor(extras.getString(Constants.WZRK_COLOR));
+            nb.setColor(color);
+            nb.setColorized(true);
+        }
+
+        String grpKey = getRandomString(10);
+
+        // uncommon
+        nb
+                .setContentText(n.extras.getString(Constants.NOTIF_MSG))
+                .setContentIntent(n.contentIntent)
+                .setAutoCancel(true)
+                .setSmallIcon(n.icon)
+                .setShowWhen(false)
+                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                .setGroup(grpKey);
+
+        RemoteViews contentView = n.contentView;
+
+        nb.setContent(contentView)
+                .setCustomContentView(contentView)
+                .setCustomBigContentView(contentView)
+                .setCustomHeadsUpContentView(contentView);
+
+        // set priority build and notify
+        nb.setPriority(NotificationCompat.PRIORITY_MAX);
+        try {
+            int notificationId = (int) (Math.random() * 100);
+            Notification notif = nb.build();
+            nm.cancel(notification.getId());
+            nm.notify(notificationId, notif);
+        } catch (Exception e) {
+            config.getLogger()
+                    .debug(config.getAccountId(), "Re triggered notification" + " " + e.toString());
+        }
+
+
+    }
 
     Comparator<StatusBarNotification> postTimeComparator = new Comparator<StatusBarNotification>() {
         @Override
@@ -1243,14 +1236,14 @@ public class PushProviders implements CTPushProviderListener {
         }
     };
 
-    private static final String ALLOWED_CHARACTERS ="0123456789qwertyuiopasdfghjklzxcvbnm";
-    private static String getRandomString(final int sizeOfRandomString)
-    {
-        final Random random=new Random();
-        final StringBuilder sb=new StringBuilder(sizeOfRandomString);
-        for(int i=0;i<sizeOfRandomString;++i)
+    private static final String ALLOWED_CHARACTERS = "0123456789qwertyuiopasdfghjklzxcvbnm";
+
+    private static String getRandomString(final int sizeOfRandomString) {
+        final Random random = new Random();
+        final StringBuilder sb = new StringBuilder(sizeOfRandomString);
+        for (int i = 0; i < sizeOfRandomString; ++i)
             sb.append(ALLOWED_CHARACTERS.charAt(random.nextInt(ALLOWED_CHARACTERS.length())));
         return sb.toString();
     }
 
-    }
+}
