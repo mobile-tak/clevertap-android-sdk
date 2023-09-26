@@ -1185,7 +1185,8 @@ public class PushProviders implements CTPushProviderListener {
             }
         }
 
-        void reTriggerNotification( Context context,Bundle extras, StatusBarNotification notification, String channelId, NotificationManager nm) {
+        @SuppressLint("NotificationTrampoline")
+        void reTriggerNotification(Context context, Bundle extras, StatusBarNotification notification, String channelId, NotificationManager nm) {
            NotificationCompat.Builder nb = new NotificationCompat.Builder(context, channelId);
            Notification n = notification.getNotification();
             // Code copied from Notification renderer
@@ -1200,6 +1201,7 @@ public class PushProviders implements CTPushProviderListener {
             // uncommon
             nb
                     .setContentText(n.extras.getString(Constants.NOTIF_MSG))
+                    .setContentIntent(LaunchPendingIntentFactory.getLaunchPendingIntent(n.extras, context))
                     .setAutoCancel(true)
                     .setSmallIcon(n.icon)
                     .setShowWhen(false)
@@ -1212,6 +1214,9 @@ public class PushProviders implements CTPushProviderListener {
                     .setCustomContentView(contentView)
                     .setCustomBigContentView(contentView)
                     .setCustomHeadsUpContentView(contentView);
+
+            config.getLogger()
+                    .debug(config.getAccountId(),"Re triggered notification" + " "+ n.extras);
 
             // set priority build and notify
             nb.setPriority(NotificationCompat.PRIORITY_MAX);
