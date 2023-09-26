@@ -1134,24 +1134,22 @@ public class PushProviders implements CTPushProviderListener {
                 notificationManager.cancel(id);
             }
 
+
             // re-setting the active notification list.
             activeNotifications = notificationManager.getActiveNotifications();
-
-
-            // Building the current notification later so that the latest notification should be on top.
-            Notification n = nb.build();
-            notificationManager.notify(notificationId, n);
-            config.getLogger().debug(config.getAccountId(), "Rendered notification: " + n.toString());//cb
-
-
             // Logic to re-trigger older notifications to maintain the group.
 
-//            for (int i = 0; i < activeNotifications.length; i++) {
-//
-//                reTriggerNotification(context, extras, activeNotifications[i], channelId, notificationManager);
-//            }
+            for (int i = 0; i < activeNotifications.length; i++) {
 
+                reTriggerNotification(context, extras, activeNotifications[i], channelId, notificationManager);
+            }
         }
+
+
+        // Building the current notification later so that the latest notification should be on top.
+        Notification n = nb.build();
+        notificationManager.notify(notificationId, n);
+        config.getLogger().debug(config.getAccountId(), "Rendered notification: " + n.toString());
 
 
         String extrasFrom = extras.getString(Constants.EXTRAS_FROM);
