@@ -1136,12 +1136,13 @@ public class PushProviders implements CTPushProviderListener {
                 notificationManager.cancel(id);
             }
 
+            // re-setting the active notification list.
+            activeNotifications = notificationManager.getActiveNotifications();
+
 
             // Logic to re-trigger older notifications to maintain the group.
 
             for(int i = 0;i<activeNotifications.length;i++){
-//                notificationManager.notify(activeNotifications[i].getId(),activeNotifications[i].getNotification());
-//                config.getLogger().debug("triggerNotification", "re-triggerNotification: " + activeNotifications[i].getNotification());
                 reTriggerNotification(context, extras, activeNotifications[i],channelId,notificationManager);
             }
 
@@ -1214,9 +1215,6 @@ public class PushProviders implements CTPushProviderListener {
                     .setCustomContentView(contentView)
                     .setCustomBigContentView(contentView)
                     .setCustomHeadsUpContentView(contentView);
-
-            config.getLogger()
-                    .debug(config.getAccountId(),"Re triggered notification" + " "+ n.contentIntent);
 
             // set priority build and notify
             nb.setPriority(NotificationCompat.PRIORITY_MAX);
