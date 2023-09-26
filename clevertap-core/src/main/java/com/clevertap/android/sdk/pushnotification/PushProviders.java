@@ -1137,10 +1137,12 @@ public class PushProviders implements CTPushProviderListener {
 
             // re-setting the active notification list.
             activeNotifications = notificationManager.getActiveNotifications();
+            // sorting the active notifications again assuming the order has changed.
+            Arrays.sort(activeNotifications, postTimeComparator);
+
             // Logic to re-trigger older notifications to maintain the group.
 
             for (int i = 0; i < activeNotifications.length; i++) {
-
                 reTriggerNotification(context, extras, activeNotifications[i], channelId, notificationManager);
             }
         }
