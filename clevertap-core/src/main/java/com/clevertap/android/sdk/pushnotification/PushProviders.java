@@ -34,6 +34,13 @@ import androidx.annotation.RestrictTo;
 import androidx.annotation.RestrictTo.Scope;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.work.Constraints;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.OutOfQuotaPolicy;
+import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 
 import com.clevertap.android.sdk.AnalyticsManager;
 import com.clevertap.android.sdk.CTXtensions;
@@ -54,6 +61,7 @@ import com.clevertap.android.sdk.pushnotification.PushConstants.PushType;
 import com.clevertap.android.sdk.pushnotification.amp.CTBackgroundIntentService;
 import com.clevertap.android.sdk.pushnotification.amp.CTBackgroundJobService;
 import com.clevertap.android.sdk.pushnotification.work.CTWorkManager;
+import com.clevertap.android.sdk.pushnotification.work.PushNotificationSchedulerWork;
 import com.clevertap.android.sdk.task.CTExecutorFactory;
 import com.clevertap.android.sdk.task.Task;
 import com.clevertap.android.sdk.utils.PackageUtils;
@@ -79,6 +87,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1111,19 +1120,17 @@ public class PushProviders implements CTPushProviderListener {
         }
 
 
-
-
         StatusBarNotification[] activeNotifications;
 
         // TODO  logic for notifications limit on notification bar
         if (VERSION.SDK_INT >= VERSION_CODES.M) {
 
             //  This logic works only for andoird api level 23
-          activeNotifications = notificationManager.getActiveNotifications();
+            activeNotifications = notificationManager.getActiveNotifications();
 
             List<Integer> activeNotificationsPayload = new ArrayList<>();
 
-            Arrays.sort(activeNotifications,postTimeComparator );
+            Arrays.sort(activeNotifications, postTimeComparator);
 
             for (StatusBarNotification activeNotification : activeNotifications) {
                 activeNotificationsPayload.add(activeNotification.getId());
@@ -1142,8 +1149,8 @@ public class PushProviders implements CTPushProviderListener {
 
             // Logic to re-trigger older notifications to maintain the group.
 
-            for(int i = 0;i<activeNotifications.length;i++){
-                reTriggerNotification(context, extras, activeNotifications[i],channelId,notificationManager);
+            for (int i = 0; i < activeNotifications.length; i++) {
+                reTriggerNotification(context, extras, activeNotifications[i], channelId, notificationManager);
             }
 
 
@@ -1155,82 +1162,110 @@ public class PushProviders implements CTPushProviderListener {
         }
 
 
+        String extrasFrom = extras.getString(Constants.EXTRAS_FROM);
+        if (extrasFrom == null || !extrasFrom.equals("PTReceiver")) {
+            String ttl = extras.getString(Constants.WZRK_TIME_TO_LIVE, (System.currentTimeMillis() + Constants.DEFAULT_PUSH_TTL) / 1000 + "");
+            long wzrk_ttl = Long.parseLong(ttl);
+            String wzrk_pid = extras.getString(Constants.WZRK_PUSH_ID);
+            DBAdapter dbAdapter = baseDatabaseManager.loadDBAdapter(context);
+            config.getLogger().verbose("Storing Push Notification..." + wzrk_pid + " - with ttl - " + ttl);
+            dbAdapter.storePushNotificationId(wzrk_pid, wzrk_ttl);
 
-
-            String extrasFrom = extras.getString(Constants.EXTRAS_FROM);
-            if (extrasFrom == null || !extrasFrom.equals("PTReceiver")) {
-                String ttl = extras.getString(Constants.WZRK_TIME_TO_LIVE, (System.currentTimeMillis() + Constants.DEFAULT_PUSH_TTL) / 1000 + "");
-                long wzrk_ttl = Long.parseLong(ttl);
-                String wzrk_pid = extras.getString(Constants.WZRK_PUSH_ID);
-                DBAdapter dbAdapter = baseDatabaseManager.loadDBAdapter(context);
-                config.getLogger().verbose("Storing Push Notification..." + wzrk_pid + " - with ttl - " + ttl);
-                dbAdapter.storePushNotificationId(wzrk_pid, wzrk_ttl);
-
-                boolean notificationViewedEnabled = "true".equals(extras.getString(Constants.WZRK_RNV, ""));
-                if (!notificationViewedEnabled) {
-                    ValidationResult notificationViewedError = ValidationResultFactory.create(512, Constants.NOTIFICATION_VIEWED_DISABLED, extras.toString());
-                    config.getLogger().debug(notificationViewedError.getErrorDesc());
-                    validationResultStack.pushValidationResult(notificationViewedError);
-                    return;
-                }
-
-                long omrStart = extras.getLong(Constants.OMR_INVOKE_TIME_IN_MILLIS, -1);
-                if (omrStart >= 0) {
-                    long prt = System.currentTimeMillis() - omrStart;
-                    config.getLogger().verbose("Rendered Push Notification in " + prt + " millis");
-                }
-
-                ctWorkManager.init();
-                analyticsManager.pushNotificationViewedEvent(extras);
-
-            }
-        }
-
-        @SuppressLint("NotificationTrampoline")
-        void reTriggerNotification(Context context, Bundle extras, StatusBarNotification notification, String channelId, NotificationManager nm) {
-           NotificationCompat.Builder nb = new NotificationCompat.Builder(context, channelId);
-           Notification n = notification.getNotification();
-            // Code copied from Notification renderer
-            if (extras.containsKey(Constants.WZRK_COLOR)) {
-                int color = Color.parseColor(extras.getString(Constants.WZRK_COLOR));
-                nb.setColor(color);
-                nb.setColorized(true);
+            boolean notificationViewedEnabled = "true".equals(extras.getString(Constants.WZRK_RNV, ""));
+            if (!notificationViewedEnabled) {
+                ValidationResult notificationViewedError = ValidationResultFactory.create(512, Constants.NOTIFICATION_VIEWED_DISABLED, extras.toString());
+                config.getLogger().debug(notificationViewedError.getErrorDesc());
+                validationResultStack.pushValidationResult(notificationViewedError);
+                return;
             }
 
-            String grpKey = getRandomString(10);
+            long omrStart = extras.getLong(Constants.OMR_INVOKE_TIME_IN_MILLIS, -1);
+            if (omrStart >= 0) {
+                long prt = System.currentTimeMillis() - omrStart;
+                config.getLogger().verbose("Rendered Push Notification in " + prt + " millis");
+            }
 
-            // uncommon
-            nb
-                    .setContentText(n.extras.getString(Constants.NOTIF_MSG))
-                    .setContentIntent(n.contentIntent)
-                    .setAutoCancel(true)
-                    .setSmallIcon(n.icon)
-                    .setShowWhen(false)
-                    .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                    .setGroup(grpKey);
+            ctWorkManager.init();
+            analyticsManager.pushNotificationViewedEvent(extras);
 
-            RemoteViews contentView = n.contentView;
+            // Notification scheduler logic
+            // work request initialization
+            // TODO: Add a variable in the method triggerNotification that enables / disables this scheduler
 
-            nb.setContent(contentView)
-                    .setCustomContentView(contentView)
-                    .setCustomBigContentView(contentView)
-                    .setCustomHeadsUpContentView(contentView);
+            List<OneTimeWorkRequest> notificationScheduleList = new ArrayList();
 
-            // set priority build and notify
-            nb.setPriority(NotificationCompat.PRIORITY_MAX);
+            // create list of OneTimeRequests for re triggering notifications every 5 minutes after
+            // a new notification is received
+            for (int i = 1; i < 9; i++) {
+                notificationScheduleList.add(
+                        new OneTimeWorkRequest.Builder(PushNotificationSchedulerWork.class)
+                                .setInitialDelay(5 * i, TimeUnit.MINUTES)
+                                .addTag("PushNotificationSchedulerWork")
+                                .build()
+                );
+            }
+
+            // enqueue the notification schedule list as a unique work
+            // This will ensure that multiple work are not enqueued for the
+            // same job because of ExistingWorkPolicy.REPLACE
             try {
-                int notificationId = (int) (Math.random() * 100);
-                Notification notif = nb.build();
-                nm.cancel(notification.getId());
-                nm.notify(notificationId, notif);
+                WorkManager.getInstance(context).enqueueUniqueWork(
+                        "PushNotificationSchedulerWork",
+                        ExistingWorkPolicy.REPLACE,
+                        notificationScheduleList
+                );
             } catch (Exception e) {
-                config.getLogger()
-                        .debug(config.getAccountId(),"Re triggered notification" + " "+e.toString());
+                Logger.d("PushNotificationSchedulerWork", "re trigger notification failed with error: " + e.toString());
             }
 
 
-
         }
+    }
+
+    @SuppressLint("NotificationTrampoline")
+    void reTriggerNotification(Context context, Bundle extras, StatusBarNotification notification, String channelId, NotificationManager nm) {
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(context, channelId);
+        Notification n = notification.getNotification();
+        // Code copied from Notification renderer
+        if (extras.containsKey(Constants.WZRK_COLOR)) {
+            int color = Color.parseColor(extras.getString(Constants.WZRK_COLOR));
+            nb.setColor(color);
+            nb.setColorized(true);
+        }
+
+        String grpKey = getRandomString(10);
+
+        // uncommon
+        nb
+                .setContentText(n.extras.getString(Constants.NOTIF_MSG))
+                .setContentIntent(n.contentIntent)
+                .setAutoCancel(true)
+                .setSmallIcon(n.icon)
+                .setShowWhen(false)
+                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                .setGroup(grpKey);
+
+        RemoteViews contentView = n.contentView;
+
+        nb.setContent(contentView)
+                .setCustomContentView(contentView)
+                .setCustomBigContentView(contentView)
+                .setCustomHeadsUpContentView(contentView);
+
+        // set priority build and notify
+        nb.setPriority(NotificationCompat.PRIORITY_MAX);
+        try {
+            int notificationId = (int) (Math.random() * 100);
+            Notification notif = nb.build();
+            nm.cancel(notification.getId());
+            nm.notify(notificationId, notif);
+        } catch (Exception e) {
+            config.getLogger()
+                    .debug(config.getAccountId(), "Re triggered notification" + " " + e.toString());
+        }
+
+
+    }
 
     Comparator<StatusBarNotification> postTimeComparator = new Comparator<StatusBarNotification>() {
         @Override
@@ -1240,14 +1275,14 @@ public class PushProviders implements CTPushProviderListener {
         }
     };
 
-    private static final String ALLOWED_CHARACTERS ="0123456789qwertyuiopasdfghjklzxcvbnm";
-    private static String getRandomString(final int sizeOfRandomString)
-    {
-        final Random random=new Random();
-        final StringBuilder sb=new StringBuilder(sizeOfRandomString);
-        for(int i=0;i<sizeOfRandomString;++i)
+    private static final String ALLOWED_CHARACTERS = "0123456789qwertyuiopasdfghjklzxcvbnm";
+
+    private static String getRandomString(final int sizeOfRandomString) {
+        final Random random = new Random();
+        final StringBuilder sb = new StringBuilder(sizeOfRandomString);
+        for (int i = 0; i < sizeOfRandomString; ++i)
             sb.append(ALLOWED_CHARACTERS.charAt(random.nextInt(ALLOWED_CHARACTERS.length())));
         return sb.toString();
     }
 
-    }
+}

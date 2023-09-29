@@ -35,6 +35,7 @@ class PushNotificationSchedulerWork(context: Context, workerParams: WorkerParame
             }
         } catch (e: Exception) {
             Logger.d(tag, "scheduling failed with error: $e")
+            return Result.failure()
         }
 
         Logger.d(tag, "scheduling finished")
