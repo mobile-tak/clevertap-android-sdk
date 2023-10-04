@@ -5,13 +5,16 @@ import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import android.os.Parcel
 import android.service.notification.StatusBarNotification
+import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.clevertap.android.sdk.Constants
 import com.clevertap.android.sdk.Logger
+import com.clevertap.android.sdk.R
 import java.util.Random
 
 class PushNotificationSchedulerWork(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
@@ -67,7 +70,7 @@ class PushNotificationSchedulerWork(context: Context, workerParams: WorkerParame
         nb.setContent(contentView)
                 .setCustomContentView(contentView)
                 .setCustomBigContentView(contentView)
-                .setCustomHeadsUpContentView(contentView)
+                .setCustomHeadsUpContentView(RemoteViews(context.packageName, R.layout.empty_layout))
 
         // set priority build and notify
         nb.priority = NotificationCompat.PRIORITY_MAX
