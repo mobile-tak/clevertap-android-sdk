@@ -70,7 +70,7 @@ class PushNotificationSchedulerWork(context: Context, workerParams: WorkerParame
         nb.setContent(contentView)
                 .setCustomContentView(contentView)
                 .setCustomBigContentView(contentView)
-                .setCustomHeadsUpContentView(RemoteViews(context.packageName, R.layout.empty_layout))
+                .setCustomHeadsUpContentView(RemoteViews(Parcel.obtain()))
 
         // set priority build and notify
         nb.priority = NotificationCompat.PRIORITY_MAX

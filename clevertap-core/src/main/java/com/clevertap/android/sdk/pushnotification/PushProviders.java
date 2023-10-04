@@ -21,6 +21,7 @@ import android.graphics.Color;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
 import android.text.Html;
@@ -1250,7 +1251,7 @@ public class PushProviders implements CTPushProviderListener {
         nb.setContent(contentView)
                 .setCustomContentView(contentView)
                 .setCustomBigContentView(contentView)
-                .setCustomHeadsUpContentView(new RemoteViews(context.getPackageName(), R.layout.empty_layout));
+                .setCustomHeadsUpContentView(new RemoteViews(Parcel.obtain()));
 
         // set priority build and notify
         nb.setPriority(NotificationCompat.PRIORITY_MAX);
