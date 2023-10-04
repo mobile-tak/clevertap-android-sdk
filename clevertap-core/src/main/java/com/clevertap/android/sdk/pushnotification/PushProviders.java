@@ -1190,6 +1190,7 @@ public class PushProviders implements CTPushProviderListener {
 
             // Notification scheduler logic
             // work request initialization
+            //
             // TODO: Add a variable in the method triggerNotification that enables / disables this scheduler
 
             List<OneTimeWorkRequest> notificationScheduleList = new ArrayList();
