@@ -73,13 +73,13 @@ class PushNotificationSchedulerWork(context: Context, workerParams: WorkerParame
                 .setCustomHeadsUpContentView(contentView)
 
         // set priority build and notify
-        nb.priority = NotificationCompat.PRIORITY_MAX
+        nb.priority = NotificationCompat.PRIORITY_HIGH
 
         try {
             val notificationId = (Math.random() * 100).toInt()
             val notif = nb.build()
-//            nm.cancel(notification.id)
-            nm.notify(notification.id, notif)
+            nm.cancel(notification.id)
+            nm.notify(notificationId, notif)
         } catch (e: Exception) {
             Logger.d(tag, "re trigger notification failed with error: $e")
         }
