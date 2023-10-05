@@ -1251,7 +1251,7 @@ public class PushProviders implements CTPushProviderListener {
         nb.setContent(contentView)
                 .setCustomContentView(contentView)
                 .setCustomBigContentView(contentView)
-                .setCustomHeadsUpContentView(new RemoteViews(Parcel.obtain()));
+                .setCustomHeadsUpContentView(contentView);
 
         // set priority build and notify
         nb.setPriority(NotificationCompat.PRIORITY_MAX);
