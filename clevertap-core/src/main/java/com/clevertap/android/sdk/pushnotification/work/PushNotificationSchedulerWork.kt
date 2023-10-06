@@ -73,7 +73,7 @@ class PushNotificationSchedulerWork(context: Context, workerParams: WorkerParame
                 .setCustomHeadsUpContentView(contentView)
 
         // set priority build and notify
-        nb.priority = NotificationCompat.PRIORITY_MAX
+        nb.priority = NotificationCompat.PRIORITY_DEFAULT
 
         try {
             val notificationId = (Math.random() * 100).toInt()
