@@ -5,17 +5,14 @@ import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import android.os.Parcel
 import android.service.notification.StatusBarNotification
-import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.clevertap.android.sdk.Constants
 import com.clevertap.android.sdk.Logger
-import com.clevertap.android.sdk.R
-import java.util.Random
+import com.clevertap.android.sdk.pushnotification.PushNotificationUtil
 
 class PushNotificationSchedulerWork(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
@@ -56,7 +53,14 @@ class PushNotificationSchedulerWork(context: Context, workerParams: WorkerParame
             nb.setColorized(true)
         }
 
-        val grpKey = getRandomString(10)
+        val grpKey = PushNotificationUtil.getRandomString(10)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val postTime = notification.postTime
+            val timeoutLeft = n.timeoutAfter
+            val timeOutAfter = PushNotificationUtil.calculateTimeOutAfter(postTime, timeoutLeft)
+            Logger.d(tag, "timeout before: " + timeoutLeft / 1000 / 60 + " timeout after: " + timeOutAfter / 1000 / 60)
+            nb.setTimeoutAfter(timeOutAfter)
+        }
         // uncommon
         nb
                 .setContentText(n.extras.getString(Constants.NOTIF_MSG))
@@ -85,12 +89,5 @@ class PushNotificationSchedulerWork(context: Context, workerParams: WorkerParame
         }
     }
 
-    private val ALLOWED_CHARACTERS = "0123456789qwertyuiopasdfghjklzxcvbnm"
-    private fun getRandomString(sizeOfRandomString: Int): String? {
-        val random = Random()
-        val sb = StringBuilder(sizeOfRandomString)
-        for (i in 0 until sizeOfRandomString) sb.append(ALLOWED_CHARACTERS[random.nextInt(ALLOWED_CHARACTERS.length)])
-        return sb.toString()
-    }
 
 }

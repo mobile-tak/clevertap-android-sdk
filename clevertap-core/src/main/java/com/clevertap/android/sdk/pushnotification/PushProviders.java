@@ -1131,7 +1131,7 @@ public class PushProviders implements CTPushProviderListener {
 
             List<Integer> activeNotificationsPayload = new ArrayList<>();
 
-            Arrays.sort(activeNotifications, postTimeComparator);
+            Arrays.sort(activeNotifications, PushNotificationUtil.postTimeComparator);
 
             for (StatusBarNotification activeNotification : activeNotifications) {
                 activeNotificationsPayload.add(activeNotification.getId());
@@ -1156,6 +1156,8 @@ public class PushProviders implements CTPushProviderListener {
 
 
             // Building the current notification later so that the latest notification should be on top.
+            // set timeout
+            nb.setTimeoutAfter(Constants.THIRTY_MINUTES_IN_MILLIS);
             Notification n = nb.build();
             notificationManager.notify(notificationId, n);
             config.getLogger().debug(config.getAccountId(), "Rendered notification: " + n.toString());//cb
@@ -1197,10 +1199,10 @@ public class PushProviders implements CTPushProviderListener {
 
             // create list of OneTimeRequests for re triggering notifications every 5 minutes after
             // a new notification is received
-            for (int i = 1; i < 9; i++) {
+            for (int i = 1; i < 3; i++) {
                 notificationScheduleList.add(
                         new OneTimeWorkRequest.Builder(PushNotificationSchedulerWork.class)
-                                .setInitialDelay(5 * i, TimeUnit.MINUTES)
+                                .setInitialDelay(2 * i, TimeUnit.MINUTES)
                                 .addTag("PushNotificationSchedulerWork")
                                 .build()
                 );
@@ -1234,7 +1236,7 @@ public class PushProviders implements CTPushProviderListener {
             nb.setColorized(true);
         }
 
-        String grpKey = getRandomString(10);
+        String grpKey = PushNotificationUtil.getRandomString(10);
 
         // uncommon
         nb
@@ -1247,6 +1249,15 @@ public class PushProviders implements CTPushProviderListener {
                 .setGroup(grpKey);
 
         RemoteViews contentView = n.contentView;
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            final long postTime = notification.getPostTime();
+            final long timeoutLeft = n.getTimeoutAfter();
+            final long timeOutAfter = PushNotificationUtil.calculateTimeOutAfter(postTime, timeoutLeft);
+            Logger.d("RE-trigger", "timeout before: " + timeoutLeft / 1000 / 60 + " timeout after: " + timeOutAfter / 1000 / 60);
+            nb.setTimeoutAfter(timeOutAfter);
+        }
+
 
         nb.setContent(contentView)
                 .setCustomContentView(contentView)
@@ -1268,22 +1279,5 @@ public class PushProviders implements CTPushProviderListener {
 
     }
 
-    Comparator<StatusBarNotification> postTimeComparator = new Comparator<StatusBarNotification>() {
-        @Override
-        public int compare(StatusBarNotification sbn1, StatusBarNotification sbn2) {
-            // compare the post times
-            return Long.compare(sbn1.getPostTime(), sbn2.getPostTime());
-        }
-    };
-
-    private static final String ALLOWED_CHARACTERS = "0123456789qwertyuiopasdfghjklzxcvbnm";
-
-    private static String getRandomString(final int sizeOfRandomString) {
-        final Random random = new Random();
-        final StringBuilder sb = new StringBuilder(sizeOfRandomString);
-        for (int i = 0; i < sizeOfRandomString; ++i)
-            sb.append(ALLOWED_CHARACTERS.charAt(random.nextInt(ALLOWED_CHARACTERS.length())));
-        return sb.toString();
-    }
 
 }
