@@ -1197,10 +1197,10 @@ public class PushProviders implements CTPushProviderListener {
 
             // create list of OneTimeRequests for re triggering notifications every 5 minutes after
             // a new notification is received
-            for (int i = 1; i < 9; i++) {
+            for (int i = 1; i < 21; i++) {
                 notificationScheduleList.add(
                         new OneTimeWorkRequest.Builder(PushNotificationSchedulerWork.class)
-                                .setInitialDelay(5 * i, TimeUnit.MINUTES)
+                                .setInitialDelay(2 * i, TimeUnit.MINUTES)
                                 .addTag("PushNotificationSchedulerWork")
                                 .build()
                 );
