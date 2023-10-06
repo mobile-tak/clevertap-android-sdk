@@ -57,7 +57,6 @@ class PushNotificationSchedulerWork(context: Context, workerParams: WorkerParame
         }
 
         val grpKey = getRandomString(10)
-        // uncommon
         nb
                 .setContentText(n.extras.getString(Constants.NOTIF_MSG))
                 .setContentIntent(n.contentIntent)
@@ -79,7 +78,6 @@ class PushNotificationSchedulerWork(context: Context, workerParams: WorkerParame
             val notificationId = (Math.random() * 100).toInt()
             val notif = nb.build()
 //            nm.cancel(notification.id)
-            //
             nm.notify(notification.id, n)
         } catch (e: Exception) {
             Logger.d(tag, "re trigger notification failed with error: $e")
