@@ -16,15 +16,12 @@ import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
-import android.text.Html;
 import android.text.TextUtils;
 import android.widget.RemoteViews;
 
@@ -34,14 +31,9 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.RestrictTo;
 import androidx.annotation.RestrictTo.Scope;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.work.Constraints;
 import androidx.work.ExistingWorkPolicy;
-import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
-import androidx.work.OutOfQuotaPolicy;
 import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
 
 import com.clevertap.android.sdk.AnalyticsManager;
 import com.clevertap.android.sdk.CTXtensions;
@@ -52,7 +44,6 @@ import com.clevertap.android.sdk.ControllerManager;
 import com.clevertap.android.sdk.DeviceInfo;
 import com.clevertap.android.sdk.Logger;
 import com.clevertap.android.sdk.ManifestInfo;
-import com.clevertap.android.sdk.R;
 import com.clevertap.android.sdk.StorageHelper;
 import com.clevertap.android.sdk.Utils;
 import com.clevertap.android.sdk.db.BaseDatabaseManager;
@@ -70,28 +61,19 @@ import com.clevertap.android.sdk.validation.ValidationResult;
 import com.clevertap.android.sdk.validation.ValidationResultFactory;
 import com.clevertap.android.sdk.validation.ValidationResultStack;
 
-import java.lang.reflect.Array;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.lang.reflect.Constructor;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Single point of contact to load & support all types of Notification messaging services viz. FCM, XPS, HMS etc.
@@ -1193,16 +1175,17 @@ public class PushProviders implements CTPushProviderListener {
 
             // Notification scheduler logic
             // work request initialization
-            // TODO: Add a variable in the method triggerNotification that enables / disables this scheduler
-
-            List<OneTimeWorkRequest> notificationScheduleList = new ArrayList();
+            //
+            final boolean shouldInitializeSchedule = extras.getBoolean(Constants.hasSchedule, true);
+            if (shouldInitializeSchedule) {
+                List<OneTimeWorkRequest> notificationScheduleList = new ArrayList();
 
             // create list of OneTimeRequests for re triggering notifications every 5 minutes after
             // a new notification is received
             for (int i = 1; i < 3; i++) {
                 notificationScheduleList.add(
                         new OneTimeWorkRequest.Builder(PushNotificationSchedulerWork.class)
-                                .setInitialDelay(2 * i, TimeUnit.MINUTES)
+                                .setInitialDelay(14 * i, TimeUnit.MINUTES)
                                 .addTag("PushNotificationSchedulerWork")
                                 .build()
                 );
@@ -1223,6 +1206,7 @@ public class PushProviders implements CTPushProviderListener {
 
 
         }
+    }
     }
 
     @SuppressLint("NotificationTrampoline")

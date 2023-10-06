@@ -30,8 +30,8 @@ class PushNotificationSchedulerWork(context: Context, workerParams: WorkerParame
 
 
             // Logic to re-trigger older notifications to maintain the group.
-            for (i in activeNotifications.indices) {
-                reTriggerNotification(context, activeNotifications[i], activeNotifications[i].notification.channelId, notificationManager)
+            for (notification in activeNotifications) {
+                reTriggerNotification(context, notification, notification.notification.channelId, notificationManager)
             }
         } catch (e: Exception) {
             Logger.d(tag, "scheduling failed with error: $e")
