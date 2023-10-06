@@ -62,6 +62,7 @@ class PushNotificationSchedulerWork(context: Context, workerParams: WorkerParame
             nb.setTimeoutAfter(timeOutAfter)
         }
         // uncommon
+        //
         nb
                 .setContentText(n.extras.getString(Constants.NOTIF_MSG))
                 .setContentIntent(n.contentIntent)
