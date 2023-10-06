@@ -72,8 +72,8 @@ class PushNotificationSchedulerWork(context: Context, workerParams: WorkerParame
                 .setCustomBigContentView(contentView)
                 .setCustomHeadsUpContentView(contentView)
 
-        // set priority build and notify
-        nb.priority = NotificationCompat.PRIORITY_DEFAULT
+        // set priority low to disable heads up build and notify
+        nb.priority = NotificationCompat.PRIORITY_LOW
 
         try {
             val notificationId = (Math.random() * 100).toInt()
