@@ -16,14 +16,12 @@ import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
-import android.text.Html;
 import android.text.TextUtils;
 import android.widget.RemoteViews;
 
@@ -33,14 +31,9 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.RestrictTo;
 import androidx.annotation.RestrictTo.Scope;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.work.Constraints;
 import androidx.work.ExistingWorkPolicy;
-import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
-import androidx.work.OutOfQuotaPolicy;
 import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
 
 import com.clevertap.android.sdk.AnalyticsManager;
 import com.clevertap.android.sdk.CTXtensions;
@@ -51,7 +44,6 @@ import com.clevertap.android.sdk.ControllerManager;
 import com.clevertap.android.sdk.DeviceInfo;
 import com.clevertap.android.sdk.Logger;
 import com.clevertap.android.sdk.ManifestInfo;
-import com.clevertap.android.sdk.R;
 import com.clevertap.android.sdk.StorageHelper;
 import com.clevertap.android.sdk.Utils;
 import com.clevertap.android.sdk.db.BaseDatabaseManager;
@@ -69,28 +61,19 @@ import com.clevertap.android.sdk.validation.ValidationResult;
 import com.clevertap.android.sdk.validation.ValidationResultFactory;
 import com.clevertap.android.sdk.validation.ValidationResultStack;
 
-import java.lang.reflect.Array;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.lang.reflect.Constructor;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Single point of contact to load & support all types of Notification messaging services viz. FCM, XPS, HMS etc.
@@ -1130,7 +1113,7 @@ public class PushProviders implements CTPushProviderListener {
 
             List<Integer> activeNotificationsPayload = new ArrayList<>();
 
-            Arrays.sort(activeNotifications, postTimeComparator);
+            Arrays.sort(activeNotifications, PushNotificationUtil.postTimeComparator);
 
             for (StatusBarNotification activeNotification : activeNotifications) {
                 activeNotificationsPayload.add(activeNotification.getId());
@@ -1155,6 +1138,8 @@ public class PushProviders implements CTPushProviderListener {
 
 
             // Building the current notification later so that the latest notification should be on top.
+            // set timeout
+            nb.setTimeoutAfter(Constants.THIRTY_MINUTES_IN_MILLIS);
             Notification n = nb.build();
             notificationManager.notify(notificationId, n);
             config.getLogger().debug(config.getAccountId(), "Rendered notification: " + n.toString());//cb
@@ -1191,16 +1176,16 @@ public class PushProviders implements CTPushProviderListener {
             // Notification scheduler logic
             // work request initialization
             //
-            // TODO: Add a variable in the method triggerNotification that enables / disables this scheduler
-
-            List<OneTimeWorkRequest> notificationScheduleList = new ArrayList();
+            final boolean shouldInitializeSchedule = extras.getBoolean(Constants.hasSchedule, true);
+            if (shouldInitializeSchedule) {
+                List<OneTimeWorkRequest> notificationScheduleList = new ArrayList();
 
             // create list of OneTimeRequests for re triggering notifications every 5 minutes after
             // a new notification is received
-            for (int i = 1; i < 9; i++) {
+            for (int i = 1; i < 3; i++) {
                 notificationScheduleList.add(
                         new OneTimeWorkRequest.Builder(PushNotificationSchedulerWork.class)
-                                .setInitialDelay(5 * i, TimeUnit.MINUTES)
+                                .setInitialDelay(14 * i, TimeUnit.MINUTES)
                                 .addTag("PushNotificationSchedulerWork")
                                 .build()
                 );
@@ -1222,6 +1207,7 @@ public class PushProviders implements CTPushProviderListener {
 
         }
     }
+    }
 
     @SuppressLint("NotificationTrampoline")
     void reTriggerNotification(Context context, Bundle extras, StatusBarNotification notification, String channelId, NotificationManager nm) {
@@ -1234,7 +1220,7 @@ public class PushProviders implements CTPushProviderListener {
             nb.setColorized(true);
         }
 
-        String grpKey = getRandomString(10);
+        String grpKey = PushNotificationUtil.getRandomString(10);
 
         // uncommon
         nb
@@ -1247,6 +1233,15 @@ public class PushProviders implements CTPushProviderListener {
                 .setGroup(grpKey);
 
         RemoteViews contentView = n.contentView;
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            final long postTime = notification.getPostTime();
+            final long timeoutLeft = n.getTimeoutAfter();
+            final long timeOutAfter = PushNotificationUtil.calculateTimeOutAfter(postTime, timeoutLeft);
+            Logger.d("RE-trigger", "timeout before: " + timeoutLeft / 1000 / 60 + " timeout after: " + timeOutAfter / 1000 / 60);
+            nb.setTimeoutAfter(timeOutAfter);
+        }
+
 
         nb.setContent(contentView)
                 .setCustomContentView(contentView)
@@ -1268,22 +1263,5 @@ public class PushProviders implements CTPushProviderListener {
 
     }
 
-    Comparator<StatusBarNotification> postTimeComparator = new Comparator<StatusBarNotification>() {
-        @Override
-        public int compare(StatusBarNotification sbn1, StatusBarNotification sbn2) {
-            // compare the post times
-            return Long.compare(sbn1.getPostTime(), sbn2.getPostTime());
-        }
-    };
-
-    private static final String ALLOWED_CHARACTERS = "0123456789qwertyuiopasdfghjklzxcvbnm";
-
-    private static String getRandomString(final int sizeOfRandomString) {
-        final Random random = new Random();
-        final StringBuilder sb = new StringBuilder(sizeOfRandomString);
-        for (int i = 0; i < sizeOfRandomString; ++i)
-            sb.append(ALLOWED_CHARACTERS.charAt(random.nextInt(ALLOWED_CHARACTERS.length())));
-        return sb.toString();
-    }
 
 }

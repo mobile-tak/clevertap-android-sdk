@@ -370,4 +370,8 @@ public interface Constants {
 
    String FLUSH_PUSH_IMPRESSIONS_ONE_TIME_WORKER_NAME = "CTFlushPushImpressionsOneTime";
 
+   // TODO: change to 30 minute.
+    long THIRTY_MINUTES_IN_MILLIS = (30 * 60 * 1000);
+
+   String hasSchedule = "hasSchedule";
 }
