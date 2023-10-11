@@ -374,4 +374,6 @@ public interface Constants {
     long THIRTY_MINUTES_IN_MILLIS = (30 * 60 * 1000);
 
    String hasSchedule = "hasSchedule";
+
+    String CUSTOM_NOTIFICATION_LAYOUT_ICON = "CLEVERTAP_CUSTOM_LAYOUT_ICON";
 }

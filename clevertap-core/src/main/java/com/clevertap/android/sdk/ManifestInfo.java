@@ -22,6 +22,8 @@ public class ManifestInfo {
 
     private static String notificationIcon;
 
+    private static String customNotificationLayoutIcon;
+
     private static ManifestInfo instance;
 
     private static String excludedActivitiesForInApps;
@@ -79,6 +81,7 @@ public class ManifestInfo {
             accountRegion = _getManifestStringValueForKey(metaData, Constants.LABEL_REGION);
         }
         notificationIcon = _getManifestStringValueForKey(metaData, Constants.LABEL_NOTIFICATION_ICON);
+        customNotificationLayoutIcon = _getManifestStringValueForKey(metaData, Constants.CUSTOM_NOTIFICATION_LAYOUT_ICON);
         useADID = "1".equals(_getManifestStringValueForKey(metaData, Constants.LABEL_USE_GOOGLE_AD_ID));
         appLaunchedDisabled = "1".equals(_getManifestStringValueForKey(metaData, Constants.LABEL_DISABLE_APP_LAUNCH));
         excludedActivitiesForInApps = _getManifestStringValueForKey(metaData, Constants.LABEL_INAPP_EXCLUDE);
@@ -143,6 +146,10 @@ public class ManifestInfo {
 
     public String getNotificationIcon() {
         return notificationIcon;
+    }
+
+    public String getCustomNotificationLayoutIcon() {
+        return customNotificationLayoutIcon;
     }
 
     public String[] getProfileKeys() {
