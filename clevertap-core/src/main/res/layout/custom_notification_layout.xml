@@ -18,12 +18,8 @@
         android:layout_marginTop="2dp"
         android:layout_marginEnd="2dp"
         android:layout_marginBottom="2dp"
-        android:background="#EC2127"
         android:importantForAccessibility="no"
-        android:src="@drawable/ic_stat_name"
         android:visibility="visible"
-        tools:src="@drawable/ic_stat_name"
-        tools:srcCompat="@drawable/ic_stat_name"
         tools:visibility="visible" />
 
     <TextView

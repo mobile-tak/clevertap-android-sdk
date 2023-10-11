@@ -22,6 +22,8 @@ import androidx.core.app.NotificationCompat.Builder;
 
 import com.clevertap.android.sdk.CleverTapInstanceConfig;
 import com.clevertap.android.sdk.Constants;
+import com.clevertap.android.sdk.DeviceInfo;
+import com.clevertap.android.sdk.ManifestInfo;
 import com.clevertap.android.sdk.R;
 import com.clevertap.android.sdk.Utils;
 import com.clevertap.android.sdk.interfaces.AudibleNotification;
@@ -138,9 +140,24 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
 
         config.getLogger()
                 .debug(config.getAccountId(),"Custom notification shown. Show when - false, group key" + grpKey);
+        // fetch the icon to be used in layout
+        int layoutIcon;
+        try {
+            String x = ManifestInfo.getInstance(context).getCustomNotificationLayoutIcon();
+            if (x == null) {
+                throw new IllegalArgumentException();
+            }
+            layoutIcon = context.getResources().getIdentifier(x, "mipmap", context.getPackageName());
+            if (layoutIcon == 0) {
+                throw new IllegalArgumentException();
+            }
+        } catch (Throwable t) {
+            // fallback to app icon
+            layoutIcon = DeviceInfo.getAppIconAsIntId(context);
+        }
 
         RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification_layout);
-        contentView.setImageViewResource(R.id.image, R.drawable.ic_stat_name);
+        contentView.setImageViewResource(R.id.image, layoutIcon);
         contentView.setTextViewText(R.id.title, Html.fromHtml(notifMessage));
         nb.setContent(contentView)
                 .setCustomContentView(contentView)
