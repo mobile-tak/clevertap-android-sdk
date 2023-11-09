@@ -124,12 +124,12 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
             nb.setColorized(true);
         }// uncommon
 
-        String grpKey = getRandomString(10);
-
+        String grpKey =PushNotificationUtil.getRandomString(10);
+        final String notifTextWithoutHtml = notifMessage.replaceAll("\\<.*?\\>", "");;
         // uncommon
         nb
 //                .setContentTitle(notifTitle)
-                .setContentText(notifMessage)
+                .setContentText(notifTextWithoutHtml)
                 .setContentIntent(LaunchPendingIntentFactory.getLaunchPendingIntent(extras, context))
                 .setAutoCancel(true)
                 .setSmallIcon(smallIcon)
@@ -159,6 +159,7 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
         RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification_layout);
         contentView.setImageViewResource(R.id.image, layoutIcon);
         contentView.setTextViewText(R.id.title, Html.fromHtml(notifMessage));
+
         nb.setContent(contentView)
                 .setCustomContentView(contentView)
                 .setCustomBigContentView(contentView)
@@ -236,16 +237,5 @@ public class CoreNotificationRenderer implements INotificationRenderer, AudibleN
         }
 
         return nb;
-    }
-
-    private static final String ALLOWED_CHARACTERS ="0123456789qwertyuiopasdfghjklzxcvbnm";
-
-    private static String getRandomString(final int sizeOfRandomString)
-    {
-        final Random random=new Random();
-        final StringBuilder sb=new StringBuilder(sizeOfRandomString);
-        for(int i=0;i<sizeOfRandomString;++i)
-            sb.append(ALLOWED_CHARACTERS.charAt(random.nextInt(ALLOWED_CHARACTERS.length())));
-        return sb.toString();
     }
 }
